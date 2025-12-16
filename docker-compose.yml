@@ -1,0 +1,36 @@
+services:
+  backend:
+    environment:
+      - PYTHONUNBUFFERED=1
+    build: .
+    container_name: finfire-api
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    networks:
+      - finfire-net
+    volumes:
+      - ./:/app
+      - ./logs/django:/var/log/django  # Mount logs for Django
+      - ./logs/gunicorn:/var/log/gunicorn        # Gunicorn logs
+      - ${MEDIA_ROOT}:/app/media
+      - ${STATIC_ROOT}:/app/static
+    command: python3 -u manage.py runserver 0.0.0.0:8000
+
+  db:
+    container_name: finfire-db-postgres
+    image: postgres:16
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - finfire-net
+    env_file: .env
+
+networks:
+  finfire-net:
