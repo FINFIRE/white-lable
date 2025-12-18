@@ -1,18 +1,18 @@
 # Base stage
-FROM --platform=amd64 amd64/python:3.11-alpine AS base
+FROM --platform=amd64 python:3.11-slim AS base
 
 # Install dependencies
-RUN apk add --no-cache \
-    build-base \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     gcc \
-    libc-dev \
-    openssl-dev \
-    zlib-dev \
-    jpeg-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libjpeg-dev \
     tzdata \
     ffmpeg \
     python3-dev \
-    bash
+    bash \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install gunicorn
 
@@ -23,7 +23,7 @@ COPY ./requirements.txt /app/
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 # Runner stage
-FROM --platform=amd64 amd64/python:3.11-alpine AS runner
+FROM --platform=amd64 python:3.11-slim AS runner
 
 WORKDIR /app
 
