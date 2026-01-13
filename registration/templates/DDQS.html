@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block ddinfo %}
+<p>For the Following Seven Documents, Mark a 0 - 1 - 2 - 3 - 4 or 5 per these guidelines</p>
+<p>0. Not Available</p>
+<p>1. Discussed, Considered, Not yet formalized</p>
+<p>2. Planned</p>
+<p>3. Drafted but not finalized</p>
+<p>4. Document Published and Distributed Amongst team for Approval</p>
+<p>5. Final Document Complete and Approved by All Appropriate Parties</p>
+{% endblock %}
+{% block button %}<button type="submit">Next</button>{% endblock %}
+{% block logout %}
+<form action="{% url 'logout_view' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+{% endblock %}

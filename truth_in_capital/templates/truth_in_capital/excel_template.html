@@ -1,0 +1,258 @@
+{% extends 'truth_in_capital/base.html' %}
+{% load custom_filter_TIC %}
+{% block title %}Excel Template - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white d-flex align-items-center justify-content-between" style="background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%);">
+                    <h3 class="mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        Excel-like Financial Overview for <span class="fw-bold">{{ business_name }}</span>
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'truth_in_capital:excel_template' %}" class="btn btn-light btn-sm me-2">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to User Selection
+                        </a>
+                        {% if selected_user %}
+                        <a href="{% url 'truth_in_capital:excel_template_download_for_user' user_id=selected_user.id %}" class="btn btn-success btn-sm me-2">
+                            <i class="fas fa-file-excel me-1"></i>
+                            Download Excel
+                        </a>
+                        {% endif %}
+                        <span class="badge bg-light text-primary fs-6">{{ capital_name }}</span>
+                    </div>
+                </div>
+                <div class="card-body bg-light rounded-bottom">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0 excel-table" style="min-width: 1200px;">
+                            <thead class="table-primary sticky-top" style="z-index: 2;">
+                                <tr style="background: linear-gradient(90deg, #e3f2fd 0%, #f8fafc 100%);">
+                                    <th colspan="1" class="fs-5 text-primary bg-white border-end-0">
+                                        <i class="fas fa-user-tie me-1"></i> {{ business_name }} - {{ capital_name }}<br>
+                                        <span class="fs-6 text-secondary">Truth of Capital Market - Type - Cost &amp; Timeline</span>
+                                    </th>
+                                    {% for i in n %}
+                                        <th class="text-center bg-white border-start-0">Week {{ i }}</th>
+                                    {% endfor %}
+                                    <th class="text-center bg-white">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-info">
+                                    <th class="bg-white">Week Starting Date</th>
+                                    <td class="bg-white fw-bold">{{ start_date|date:'M d, Y' }}</td>
+                                    {% for i in n %}
+                                        <td class="bg-white"><span class="js-week-date" data-index="{{ forloop.counter0 }}"></span></td>
+                                    {% endfor %}
+                                </tr>
+                                <tr class="table-info">
+                                    <th class="bg-white">Week Ending Date</th>
+                                    <td class="bg-white fw-bold">{{ end_date_sunday|date:'M d, Y' }}</td>
+                                    {% for i in n %}
+                                        <td class="bg-white"><span class="js-week-date-sunday" data-index="{{ forloop.counter0 }}"></span></td>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-building me-1"></i> Enterprise Registration</td>
+                                    <td colspan="13" class="bg-light text-success">No Charge</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-file-signature me-1"></i> Finfire Letter - Capital Market</td>
+                                    <td colspan="13" class="bg-light text-success">No Charge</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-list-alt me-1"></i> Truth in capital type, cost, timeline form</td>
+                                    <td colspan="13" class="bg-light text-success">No Charge</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="15" class="bg-warning text-dark fw-bold text-center shadow-sm">
+                                        <i class="fas fa-bullseye me-2"></i>Goal is to raise <span class="text-primary">{{ raisegoal }}</span> for <span class="text-primary">{{ business_name }}</span> THROUGH <span class="text-primary">{{ capital_name }}</span>
+                                    </td>
+                                </tr>
+                                <!-- FINFIRE Staff Review & Scope of Work -->
+                                <tr class="table-secondary">
+                                    <td colspan="15" class="fw-bold text-primary"><i class="fas fa-users-cog me-2"></i>FINFIRE Staff Review & Scope of Work</td>
+                                </tr>
+                                {% for task in tasks %}
+                                    {% if task.task_type == 'FINFIRE Staff Review & Scope of Work' %}
+                                    <tr>
+                                        <td class="ps-4"><i class="fas fa-tasks me-1 text-info"></i> {{ task.task_name }}</td>
+                                        {% for value in task_dict|get_item:task.task_name %}
+                                            <td class="bg-white">{{ value }}</td>
+                                        {% endfor %}
+                                        <td class="bg-white fw-bold text-primary">{{ task_dict|get_item:task.task_name|sum_values }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                <tr>
+                                    <td class="bg-white"><strong>Total FINFIRE Staff Hours</strong></td>
+                                    {% for i in finfire_staff_totals %}
+                                        <td class="bg-white fw-bold text-primary">{{ i }}</td>
+                                    {% endfor %}
+                                    <td class="bg-white fw-bold text-primary">{{ finfire_staff_grand_total|default:"0" }}</td>
+                                </tr>
+                                <!-- Intermediary Services Scope of Work -->
+                                <tr class="table-secondary">
+                                    <td colspan="15" class="fw-bold text-primary"><i class="fas fa-handshake me-2"></i>Intermediary Services Scope of Work</td>
+                                </tr>
+                                {% for task in tasks %}
+                                    {% if task.task_type == 'Intermediary Services Scope of Work' %}
+                                    <tr>
+                                        <td class="ps-4"><i class="fas fa-tasks me-1 text-success"></i> {{ task.task_name }}</td>
+                                        {% for value in task_dict|get_item:task.task_name %}
+                                            <td class="bg-white">{{ value }}</td>
+                                        {% endfor %}
+                                        <td class="bg-white fw-bold text-success">{{ task_dict|get_item:task.task_name|sum_values }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <tr>
+                                    <td class="bg-white"><strong>Total Intermediary Services Hours</strong></td>
+                                    {% for i in intermediary_totals %}
+                                        <td class="bg-white fw-bold text-success">{{ i }}</td>
+                                    {% endfor %}
+                                    <td class="bg-white fw-bold text-success">{{ intermediary_grand_total|default:"0" }}</td>
+                                </tr>
+                               
+                                <!-- Summary rows -->
+                                <tr class="table-secondary">
+                                    <td colspan="15" class="fw-bold text-primary"><i class="fas fa-receipt me-2"></i>Summary of Fee Schedule</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-user-friends me-1"></i>Per contact match fee</td>
+                                    {% for i in n %}<td class="bg-white">20</td>{% endfor %}
+                                    <td class="bg-white">20</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-coins me-1"></i> Monthly SaaS Fee</td>
+                                    {% for i in n %}<td class="bg-white">-</td>{% endfor %}
+                                    <td class="bg-white">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-user-tie me-1"></i> Average Finfire Staff Rate</td>
+                                    {% for i in n %}<td class="bg-white">125</td>{% endfor %}
+                                    <td class="bg-white">125</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-briefcase me-1"></i> Average Intermediary Rate</td>
+                                    {% for i in n %}<td class="bg-white">250</td>{% endfor %}
+                                    <td class="bg-white">250</td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-wallet me-1"></i> Net Budget by Week</td>
+                                    {% for i in weekly_budgets %}
+                                        <td class="bg-white fw-bold text-primary">
+                                            {{ i|default:"0.00" }}
+                                        </td>
+                                    {% endfor %}
+                                    <td class="bg-white fw-bold text-primary">
+                                        {% with finfire_total_cost=finfire_staff_grand_total|multiply:125 %}
+                                            {% with intermediary_total_cost=intermediary_grand_total|multiply:250 %}
+                                                {{ finfire_total_cost|add:intermediary_total_cost|floatformat:2 }}
+                                            {% endwith %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-chart-line me-1"></i> Cumulative Budget</td>
+                                    {% for i in cumulative_budgets %}
+                                        <td class="bg-white fw-bold text-success">
+                                            {{ i|default:"0.00" }}
+                                        </td>
+                                    {% endfor %}
+                                    <td class="bg-white fw-bold text-success">
+                                        {% with finfire_total_cost=finfire_staff_grand_total|multiply:125 %}
+                                            {% with intermediary_total_cost=intermediary_grand_total|multiply:250 %}
+                                                {{ finfire_total_cost|add:intermediary_total_cost|floatformat:2 }}
+                                            {% endwith %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="bg-light"><i class="fas fa-file-invoice-dollar me-1"></i> Invoice Due</td>
+                                    {% for i in weekly_budgets %}<td class="bg-white fw-bold text-primary"> {{ i|default:"0.00" }}</td>{% endfor %}
+                                    <td class="bg-white fw-bold text-primary">
+                                        {% with finfire_total_cost=finfire_staff_grand_total|multiply:125 %}
+                                            {% with intermediary_total_cost=intermediary_grand_total|multiply:250 %}
+                                                {{ finfire_total_cost|add:intermediary_total_cost|floatformat:2 }}
+                                            {% endwith %}
+                                        {% endwith %}
+                                    </td>                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .excel-table th, .excel-table td {
+        vertical-align: middle !important;
+        font-size: 1rem;
+        border: 1px solid #dee2e6 !important;
+    }
+    .excel-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f8fafc;
+    }
+    .excel-table tbody tr:hover {
+        background: #f1f3f6;
+        transition: background 0.2s;
+    }
+    .excel-table .table-secondary {
+        background: linear-gradient(90deg, #e3f2fd 0%, #f8fafc 100%) !important;
+    }
+    .excel-table .bg-warning {
+        background: linear-gradient(90deg, #fff3cd 0%, #ffe082 100%) !important;
+    }
+    .excel-table .bg-light {
+        background: #f8f9fa !important;
+    }
+    .excel-table .fw-bold {
+        font-weight: 600 !important;
+    }
+</style>
+<script>
+    // Helper to format date as 'M d, Y'
+    function formatDate(date) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return months[date.getMonth()] + ' ' + String(date.getDate()).padStart(2, '0') + ', ' + date.getFullYear();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the Django start_date and end_date_sunday as YYYY-MM-DD
+        const startDateStr = '{{ start_date|date:"Y-m-d" }}';
+        const endDateStr = '{{ end_date_sunday|date:"Y-m-d" }}';
+        if (startDateStr) {
+            const startDate = new Date(startDateStr);
+            startDate.setDate(startDate.getDate() + 7); // Start with +7 days
+            document.querySelectorAll('.js-week-date').forEach(function(span) {
+                const weekIndex = parseInt(span.getAttribute('data-index'));
+                if (isNaN(weekIndex)) return;
+                const weekDate = new Date(startDate);
+                weekDate.setDate(startDate.getDate() + 7 * weekIndex);
+                span.textContent = formatDate(weekDate);
+            });
+        }
+        if (endDateStr) {
+            const endDate = new Date(endDateStr);
+            endDate.setDate(endDate.getDate() + 7); // Start with +7 days
+            document.querySelectorAll('.js-week-date-sunday').forEach(function(span) {
+                const weekIndex = parseInt(span.getAttribute('data-index'));
+                if (isNaN(weekIndex)) return;
+                const weekDate = new Date(endDate);
+                weekDate.setDate(endDate.getDate() + 7 * weekIndex);
+                span.textContent = formatDate(weekDate);
+            });
+        }
+    });
+</script>
+{% endblock %} 

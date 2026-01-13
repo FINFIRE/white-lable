@@ -1,0 +1,69 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Capital Types - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Capital Types</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'truth_in_capital:capital_type_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">New Capital Type</span>
+            <span class="d-sm-none">New</span>
+        </a>
+    </div>
+</div>
+
+{% if capital_types %}
+    <div class="row">
+        {% for capital_type in capital_types %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ capital_type.user}} : {{ capital_type.capital_type }}</h5>
+                        <p class="card-text">
+                            <span class="badge bg-primary">{{ capital_type.tasks.count }} tasks</span>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{% url 'truth_in_capital:task_list_by_capital_type' capital_type.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-tasks"></i> <span class="d-none d-sm-inline">View Tasks</span>
+                                    <span class="d-sm-none">Tasks</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'truth_in_capital:task_create_for_capital_type' capital_type.pk %}" class="btn btn-outline-success btn-sm w-100">
+                                    <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add Task</span>
+                                    <span class="d-sm-none">Add</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'truth_in_capital:capital_type_update' capital_type.pk %}" class="btn btn-outline-warning btn-sm w-100">
+                                    <i class="fas fa-edit"></i> <span class="d-none d-sm-inline">Edit</span>
+                                    <span class="d-sm-none">Edit</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'truth_in_capital:capital_type_delete' capital_type.pk %}" class="btn btn-outline-danger btn-sm w-100">
+                                    <i class="fas fa-trash"></i> <span class="d-none d-sm-inline">Delete</span>
+                                    <span class="d-sm-none">Delete</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-list fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">No Capital Types Yet</h3>
+        <p class="text-muted">Get started by creating your first capital type.</p>
+        <a href="{% url 'truth_in_capital:capital_type_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Your First Capital Type
+        </a>
+    </div>
+{% endif %}
+{% endblock %} 

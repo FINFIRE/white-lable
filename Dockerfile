@@ -2,18 +2,18 @@
 FROM --platform=amd64 python:3.11-slim AS base
 
 # Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    libssl-dev \
-    zlib1g-dev \
-    libjpeg-dev \
-    tzdata \
-    ffmpeg \
-    python3-dev \
-    bash \
-    && rm -rf /var/lib/apt/lists/*
-
+#RUN apt-get update && apt-get install -y --no-install-recommends \
+#    build-essential \
+#    gcc \
+#    libssl-dev \
+#    zlib1g-dev \
+#    libjpeg-dev \
+#    tzdata \
+#    ffmpeg \
+#    python3-dev \
+#    bash \
+#    && rm -rf /var/lib/apt/lists/*
+#
 RUN pip3 install gunicorn
 
 WORKDIR /app

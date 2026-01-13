@@ -1,0 +1,261 @@
+{% extends "forms.html" %}
+{% block heading %}<h1>Rating for Your Tasks</h1>{% endblock heading %}
+{% block formarea %}{% for field in form %}
+                                 <div class="col-md-6 col-lg-4 mb-4">
+                                     <div class="form-group">
+                                        <label for="{{ field.id_for_label }}" class="form-label">
+                                            <strong>{{ field.label|safe }}</strong>
+                                        </label>
+                                         <div class="rating-slider-container">
+                                             <input type="range" 
+                                                    class="form-range rating-slider" 
+                                                    id="{{ field.id_for_label }}_slider"
+                                                    name="{{ field.name }}"
+                                                    min="0" 
+                                                    max="10" 
+                                                    value="{{ field.value|default:0 }}"
+                                                    oninput="updateRatingValue(this, '{{ field.id_for_label }}_display')">
+                                             <div class="d-flex justify-content-between align-items-center mt-2">
+                                                 <span class="rating-value-display" id="{{ field.id_for_label }}_display">{{ field.value|default:0 }}</span>
+                                                 <div class="rating-scale">
+                                                     <small class="text-muted">0</small>
+                                                     <small class="text-muted ms-auto">10</small>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         {% if field.help_text %}
+                                             <div class="form-text">{{ field.help_text }}</div>
+                                         {% endif %}
+                                         {% if field.errors %}
+                                             <div class="invalid-feedback d-block">
+                                                 {% for error in field.errors %}
+                                                     {{ error }}
+                                                 {% endfor %}
+                                             </div>
+                                         {% endif %}
+                                     </div>
+                                 </div>
+                             {% endfor %}
+                             <style>
+                                .tooltip {
+                                    position: relative;
+                                    display: inline-block;
+                                }
+                            
+                                .tooltip .tooltip-text {
+                                    visibility: hidden;
+                                    width: 300px;
+                                    background-color: #555;
+                                    color: #fff;
+                                    text-align: center;
+                                    border-radius: 6px;
+                                    padding: 8px;
+                                    position: absolute;
+                                    z-index: 1;
+                                    bottom: 125%;
+                                    left: 50%;
+                                    margin-left: -150px;
+                                    opacity: 0;
+                                    transition: opacity 0.3s;
+                                    font-size: 12px;
+                                }
+                            
+                                .tooltip:hover .tooltip-text {
+                                    visibility: visible;
+                                    opacity: 1;
+                                }
+                            
+                                /* Rating Slider Styles */
+                                .rating-slider-container {
+                                    background: #f8f9fa;
+                                    padding: 15px;
+                                    border-radius: 8px;
+                                    border: 1px solid #dee2e6;
+                                }
+                            
+                                .rating-slider {
+                                    width: 100%;
+                                    height: 8px;
+                                    border-radius: 5px;
+                                    background: #ddd;
+                                    outline: none;
+                                    -webkit-appearance: none;
+                                    appearance: none;
+                                }
+                            
+                                .rating-slider::-webkit-slider-thumb {
+                                    -webkit-appearance: none;
+                                    appearance: none;
+                                    width: 20px;
+                                    height: 20px;
+                                    border-radius: 50%;
+                                    background: #007bff;
+                                    cursor: pointer;
+                                    border: 2px solid #fff;
+                                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                    transition: all 0.2s ease;
+                                }
+                            
+                                .rating-slider::-webkit-slider-thumb:hover {
+                                    background: #0056b3;
+                                    transform: scale(1.1);
+                                }
+                            
+                                .rating-slider::-moz-range-thumb {
+                                    width: 20px;
+                                    height: 20px;
+                                    border-radius: 50%;
+                                    background: #007bff;
+                                    cursor: pointer;
+                                    border: 2px solid #fff;
+                                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                    transition: all 0.2s ease;
+                                }
+                            
+                                .rating-slider::-moz-range-thumb:hover {
+                                    background: #0056b3;
+                                    transform: scale(1.1);
+                                }
+                            
+                                .rating-value-display {
+                                    font-size: 1.2rem;
+                                    font-weight: bold;
+                                    color: #007bff;
+                                    min-width: 40px;
+                                    text-align: center;
+                                    background: #fff;
+                                    padding: 4px 8px;
+                                    border-radius: 4px;
+                                    border: 1px solid #dee2e6;
+                                    white-space: nowrap;
+                                }
+                            
+                                .rating-scale {
+                                    display: flex;
+                                    justify-content: space-between;
+                                    width: 100%;
+                                    margin-top: 5px;
+                                }
+                            
+                                /* Color coding for different rating ranges */
+                                .rating-slider[data-value="0"]::-webkit-slider-thumb { background: #dc3545; }
+                                .rating-slider[data-value="1"]::-webkit-slider-thumb { background: #dc3545; }
+                                .rating-slider[data-value="2"]::-webkit-slider-thumb { background: #dc3545; }
+                                .rating-slider[data-value="3"]::-webkit-slider-thumb { background: #fd7e14; }
+                                .rating-slider[data-value="4"]::-webkit-slider-thumb { background: #fd7e14; }
+                                .rating-slider[data-value="5"]::-webkit-slider-thumb { background: #ffc107; }
+                                .rating-slider[data-value="6"]::-webkit-slider-thumb { background: #ffc107; }
+                                .rating-slider[data-value="7"]::-webkit-slider-thumb { background: #20c997; }
+                                .rating-slider[data-value="8"]::-webkit-slider-thumb { background: #20c997; }
+                                .rating-slider[data-value="9"]::-webkit-slider-thumb { background: #28a745; }
+                                .rating-slider[data-value="10"]::-webkit-slider-thumb { background: #28a745; }
+                            
+                                .rating-slider[data-value="0"]::-moz-range-thumb { background: #dc3545; }
+                                .rating-slider[data-value="1"]::-moz-range-thumb { background: #dc3545; }
+                                .rating-slider[data-value="2"]::-moz-range-thumb { background: #dc3545; }
+                                .rating-slider[data-value="3"]::-moz-range-thumb { background: #fd7e14; }
+                                .rating-slider[data-value="4"]::-moz-range-thumb { background: #fd7e14; }
+                                .rating-slider[data-value="5"]::-moz-range-thumb { background: #ffc107; }
+                                .rating-slider[data-value="6"]::-moz-range-thumb { background: #ffc107; }
+                                .rating-slider[data-value="7"]::-moz-range-thumb { background: #20c997; }
+                                .rating-slider[data-value="8"]::-moz-range-thumb { background: #20c997; }
+                                .rating-slider[data-value="9"]::-moz-range-thumb { background: #28a745; }
+                                .rating-slider[data-value="10"]::-moz-range-thumb { background: #28a745; }
+                            
+                                /* Rating value display colors */
+                                .rating-value-display[data-value="0"] { color: #dc3545; }
+                                .rating-value-display[data-value="1"] { color: #dc3545; }
+                                .rating-value-display[data-value="2"] { color: #dc3545; }
+                                .rating-value-display[data-value="3"] { color: #fd7e14; }
+                                .rating-value-display[data-value="4"] { color: #fd7e14; }
+                                .rating-value-display[data-value="5"] { color: #ffc107; }
+                                .rating-value-display[data-value="6"] { color: #ffc107; }
+                                .rating-value-display[data-value="7"] { color: #20c997; }
+                                .rating-value-display[data-value="8"] { color: #20c997; }
+                                .rating-value-display[data-value="9"] { color: #28a745; }
+                                .rating-value-display[data-value="10"] { color: #28a745; }
+                            </style>
+                            
+                            <script>
+                                function updateRatingValue(slider, displayId) {
+                                    const display = document.getElementById(displayId);
+                                    const value = slider.value;
+                                    
+                                    // Update the display value
+                                    display.textContent = value;
+                                    display.setAttribute('data-value', value);
+                                    
+                                    // Update slider data attribute for color coding
+                                    slider.setAttribute('data-value', value);
+                                    
+                                    // Add visual feedback
+                                    display.style.transform = 'scale(1.1)';
+                                    setTimeout(() => {
+                                        display.style.transform = 'scale(1)';
+                                    }, 150);
+                                }
+                            
+                                function resetForm() {
+                                    if (confirm('Are you sure you want to reset all ratings to their default values?')) {
+                                        // Reset all sliders to default value (0)
+                                        const sliders = document.querySelectorAll('.rating-slider');
+                                        sliders.forEach(slider => {
+                                            slider.value = 0;
+                                            updateRatingValue(slider, slider.id.replace('_slider', '_display'));
+                                        });
+                                    }
+                                }
+                            
+                                // Initialize sliders on page load
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const sliders = document.querySelectorAll('.rating-slider');
+                                    
+                                    sliders.forEach(slider => {
+                                        const displayId = slider.id.replace('_slider', '_display');
+                                        const display = document.getElementById(displayId);
+                                        
+                                        // Set initial data attributes for color coding
+                                        slider.setAttribute('data-value', slider.value);
+                                        display.setAttribute('data-value', slider.value);
+                                        
+                                        // Add change event listener for better UX
+                                        slider.addEventListener('change', function() {
+                                            updateRatingValue(this, displayId);
+                                        });
+                                    });
+                                    
+                                    // Add keyboard navigation support
+                                    sliders.forEach(slider => {
+                                        slider.addEventListener('keydown', function(e) {
+                                            let newValue = parseInt(this.value);
+                                            
+                                            switch(e.key) {
+                                                case 'ArrowLeft':
+                                                case 'ArrowDown':
+                                                    e.preventDefault();
+                                                    newValue = Math.max(0, newValue - 1);
+                                                    break;
+                                                case 'ArrowRight':
+                                                case 'ArrowUp':
+                                                    e.preventDefault();
+                                                    newValue = Math.min(10, newValue + 1);
+                                                    break;
+                                                case 'Home':
+                                                    e.preventDefault();
+                                                    newValue = 0;
+                                                    break;
+                                                case 'End':
+                                                    e.preventDefault();
+                                                    newValue = 10;
+                                                    break;
+                                            }
+                                            
+                                            if (newValue !== parseInt(this.value)) {
+                                                this.value = newValue;
+                                                updateRatingValue(this, this.id.replace('_slider', '_display'));
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+{% endblock formarea %}                            

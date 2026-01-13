@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+{% block heading %}<h1>CONTACT INFORMATION</h1>{% endblock heading %}
+{% block button %}<button type="submit">Next Question</button>{% endblock %}
+{% block logout %}
+<form action="{% url 'logout_view' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+{% endblock %}

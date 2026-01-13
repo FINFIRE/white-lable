@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+{% block header %}    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="FINFIRE">
+    <meta name="description" content="FINFIRE is a platform that helps entrepreneurs find the right capital for their business.">
+    <meta name="keywords" content="FINFIRE, capital, entrepreneurship, startup, business">
+    <meta name="author" content="FINFIRE">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    <meta name="google" content="notranslate">
+    <meta property="og:title" content="FINFIRE">
+    <meta property="og:description" content="FINFIRE is a platform that helps entrepreneurs find the right capital for their business.">
+    <meta property="og:image" content="{% static 'img/b.png' %}">
+    <meta property="og:url" content="https://appfinfire.com">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="FINFIRE">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
+    <center>
+        <div class="logo-wrapper">
+            <a href="{% url 'home' %}" class="logo-container">
+                <img src="{% static 'img/b.png' %}" alt="FINFIRE Logo">
+            </a>
+        </div>
+    </center>
+    {% block title %}<title>FINFIRE</title>{% endblock title %}
+    <style>
+        :root {
+            --primary-color: #00b0f0;
+            --secondary-color: #333;
+            --danger-color: #dc3545;
+            --background-color: #f8f9fa;
+            --container-bg: #ffffff;
+            --shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.6;
+            color: var(--secondary-color);
+            background-image: url('static/background.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .User {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        form p {
+            margin: 0;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 176, 240, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"] {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0090d0;
+            transform: translateY(-1px);
+        }
+
+        .logout-button button {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 10px 20px;
+        }
+
+        .logout-button button:hover {
+            background-color: #c82333;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                background-attachment: scroll;
+            }
+
+            .container {
+                padding: 15px;
+                margin: 5px;
+                border-radius: 8px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            form {
+                gap: 15px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 2px;
+            }
+            
+            .container {
+                padding: 10px;
+                margin: 2px;
+            }
+            
+            h1 {
+                font-size: 1.4rem;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+
+        /* Enhanced 3D Logo Styling */
+        .logo-wrapper {
+            perspective: 1000px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo-container {
+            display: inline-block;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+            width: 400px; /* Increased width */
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 15px rgba(0, 176, 240, 0.2))
+                   drop-shadow(0 5px 8px rgba(0, 0, 0, 0.15));
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo-container:hover {
+            transform: translateY(-8px) rotateY(5deg) rotateX(5deg);
+        }
+
+        .logo-container:hover img {
+            filter: drop-shadow(0 20px 25px rgba(0, 176, 240, 0.3))
+                   drop-shadow(0 10px 12px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-container:active {
+            transform: translateY(2px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at center,
+                rgba(0, 176, 240, 0.1) 0%,
+                transparent 70%
+            );
+            top: 20px;
+            left: 0;
+            transform: translateZ(-1px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .logo-container:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes logoFloat {
+            0% {
+                transform: translateY(0) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-5px) rotateY(2deg);
+            }
+            100% {
+                transform: translateY(0) rotateY(0deg);
+            }
+        }
+
+        .logo-container {
+            animation: logoFloat 6s ease-in-out infinite;
+        }
+
+        /* Update the HTML structure to use these classes */
+        center a {
+            text-decoration: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo-container {
+                width: 300px;
+            }
+            
+            .logo-wrapper {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                width: 200px;
+            }
+            
+            .logo-wrapper {
+                padding: 5px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .logo-container {
+                width: 150px;
+            }
+        }
+
+        /* Form input alignment fixes */
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: auto;
+            vertical-align: middle;
+            margin: 0 8px 0 0;
+            position: relative;
+            top: -1px;
+        }
+
+        /* Label styling for radio and checkbox options */
+        form label[for] {
+            display: inline-block;
+            margin-bottom: 8px;
+            vertical-align: middle;
+        }
+
+        /* Container for radio/checkbox groups */
+        form ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        form ul li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        form ul li label {
+            margin: 0;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        // Show the button only if there's a previous page
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.history.length > 1) {
+                document.getElementById("backButton").style.display = "block";
+            }
+        });
+    </script>        
+</head>
+{% endblock header %}
+<body>
+    {% block headhead %}<h1>FINFIRE Inc.</h1>
+    <p>{% include "header.html" %}</p>{% endblock headhead %}
+    {% block main %}
+    <div class="User">
+        {% block User %}
+        {% endblock %}
+    </div>
+    <div class="container">
+        <h1>{% block heading %}{% endblock %}</h1>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form_count == 2 %}
+                <!-- Render two forms with paragraphs above -->
+                <p><strong>There are more than 85 potential capital types within 17 capital markets</strong></p>
+                <p><strong>Based on the inputs you've provided, FINFIRE will match the situation, timing, stage of development, purpose to the most appropriate capital type</strong></p>
+                <p><strong>However, your entrepreneurial preferences are equally important</strong></p>
+                <p><strong>To that end, please define the importance of the following variables in order to narrow down the MOST applicable capital type.</strong></p>
+                <p><strong>However, your entrepreneurial preferences are equally important</strong></p>
+                <p><strong>Rate the following variables one scale of 1 to 10, 1 being the least important, 10 being the most important:</strong></p>
+                {{ form1.as_p }}
+                <p><strong>The timing of finance is also a critical factor (How long will the process take from application to capital):</strong></p>
+                <p><strong>From start to finish, the time I am comfortable for it to take to complete the application, interviews, forms, due diligence, presentation materials, supporting materials, data room creation, review & Analysis </strong></p>
+                {{ form2.as_p }}
+            {% else %}
+                {% block formarea %}{{ form.as_p }}{% endblock formarea %}
+            {% endif %}
+
+            {% block button %}{% endblock %}
+        </form>
+
+        <div class="logout-button">
+            {% block logout %}
+            {% endblock %}
+        </div>
+    </div>
+    {% endblock main %}
+    
+    {% block footer %}<p>{% include "footer.html" %}</p>{% endblock footer %}
+<script>
+function formatPhoneNumber(value) {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '').slice(0, 10);
+
+    const area = digits.slice(0, 3);
+    const prefix = digits.slice(3, 6);
+    const line = digits.slice(6, 10);
+
+    if (digits.length > 6) {
+        return `(${area}) ${prefix}-${line}`;
+    } else if (digits.length > 3) {
+        return `(${area}) ${prefix}`;
+    } else if (digits.length > 0) {
+        return `(${area}`;
+    }
+    return '';
+}
+
+function attachPhoneFormatter(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.addEventListener('input', function () {
+        const cursorPosition = input.selectionStart;
+        input.value = formatPhoneNumber(input.value);
+        input.setSelectionRange(cursorPosition, cursorPosition);
+    });
+}
+
+// Attach formatters
+attachPhoneFormatter('business-phone');
+attachPhoneFormatter('mobile-phone');
+</script>
+</body>
+</html>
+
+<!-- Back Button -->
+<button onclick="goBack()" id="backButton" style="position: fixed; bottom: 10px; left: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; display: none;">
+    Back
+</button>
+
+

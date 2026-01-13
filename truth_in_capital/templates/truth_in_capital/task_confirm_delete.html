@@ -1,0 +1,72 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Delete Task - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Delete Task</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'truth_in_capital:task_list_by_capital_type' task.capital_type.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Tasks
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Deletion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">Warning!</h6>
+                    <p class="mb-0">Are you sure you want to delete the task "<strong>{{ task.task_name }}</strong>"?</p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Task Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Task Name:</strong></p>
+                                <p class="text-muted">{{ task.task_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Capital Type:</strong></p>
+                                <p class="text-muted">{{ task.capital_type.name }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Hours:</strong></p>
+                                <p class="text-muted">{{ task.task_max_hour }}h</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Precedence:</strong></p>
+                                <p class="text-muted">{{ task.task_precedence }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-muted">This action cannot be undone.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Yes, Delete Task
+                        </button>
+                        <a href="{% url 'truth_in_capital:task_list_by_capital_type' task.capital_type.pk %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

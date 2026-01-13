@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% block header %}
+<style>
+    h1{
+        text-align: center;
+        color: #333;
+    }
+</style>    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
+    <title>Data Display</title>
+</head>
+{% endblock header %}
+<body>
+    {% block main %}
+    <h1>Capital Matches</h1>
+    Please select the link for information on your top 6 capital types.
+    {% for link in list_name %}
+    {% if link != True and link != False %}
+    <li><a href="{% url link  %}">{{ link }}</a></li>
+    {% endif %}
+    {% endfor %}
+    {{ table|safe }}
+    <h1>Intermediaries Matches</h1>
+    {{ table_i|safe }}
+    {% endblock main %}
+</body>
+</html>

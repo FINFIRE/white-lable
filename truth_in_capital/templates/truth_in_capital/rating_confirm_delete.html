@@ -1,0 +1,40 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Delete Rating - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Delete Rating</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'truth_in_capital:rating_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Ratings
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-trash text-danger"></i> Confirm Delete
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <p>Are you sure you want to delete the rating for task <strong>{{ rating_obj.task.task_name }}</strong> (Rating: <strong>{{ rating_obj.rating }}</strong>)?</p>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <a href="{% url 'truth_in_capital:rating_list' %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
