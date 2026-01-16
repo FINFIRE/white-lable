@@ -36,14 +36,17 @@ SHARED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authusers.apps.AuthusersConfig',
 
 
     'rest_framework',
     'corsheaders',
     'django_filters',
+    'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+
+
+    'Algorithm.apps.AlgorithmConfig',
 
 )
 
@@ -56,13 +59,18 @@ TENANT_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'registration.apps.RegistrationConfig',
+    'iquestions.apps.IquestionsConfig',
+    'CM_Market.apps.CmMarketConfig',
+    'entreprise_questions.apps.EntrepriseQuestionsConfig',
+    'connections.apps.ConnectionsConfig',
+    'master_review.apps.MasterReviewConfig',
+    'Matching_Algorithm.apps.MatchingAlgorithmConfig',
+    'truth_in_capital.apps.TruthInCapitalConfig',
 
-
-    'authusers.apps.AuthusersConfig',
     'rest_framework_simplejwt.token_blacklist',
 
-
-
+    'djoser',
 
 )
 
@@ -100,10 +108,6 @@ TEMPLATES = [
 ]
 
 
-
-AUTH_USER_MODEL = 'authusers.CustomUser'
-
-
 WSGI_APPLICATION = 'finfire_whitelable.wsgi.application'
 
 
@@ -129,7 +133,14 @@ DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
 )
 
-
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'password-reset-confirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    #'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {},
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -197,7 +208,7 @@ TENANT_DOMAIN_MODEL = "tenants.Domain"  # app.Model
 # urls config for global and tenant urls
 ROOT_URLCONF = 'finfire_whitelable.urls'
 PUBLIC_SCHEMA_URLCONF = 'finfire_whitelable.public_urls'
-SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = False
 
 
 
