@@ -9,7 +9,7 @@ import django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Set up Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finfire_web.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finfire_whitelable.settings')
 django.setup()
 
 from django.contrib.auth.models import User

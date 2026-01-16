@@ -1,54 +1,43 @@
-# Base stage
-FROM --platform=amd64 python:3.11-slim AS base
+# --- Stage 1: Builder ---
+FROM --platform=amd64 python:3.11-slim AS builder
 
-# Install dependencies
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    build-essential \
-#    gcc \
-#    libssl-dev \
-#    zlib1g-dev \
-#    libjpeg-dev \
-#    tzdata \
-#    ffmpeg \
-#    python3-dev \
-#    bash \
-#    && rm -rf /var/lib/apt/lists/*
-#
-RUN pip3 install gunicorn
+WORKDIR /build
 
-WORKDIR /app
+# Install build-essential if any requirements need compilation
+RUN apt-get update && apt-get install -y --no-install-recommends gcc python3-dev
 
-# Copy requirements and install dependencies
-COPY ./requirements.txt /app/
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install gunicorn
 
-# Runner stage
+# --- Stage 2: Runner ---
 FROM --platform=amd64 python:3.11-slim AS runner
 
+# 1. Install ONLY the necessary runtime system libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libglib2.0-0 \
+    shared-mime-info \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copy dependencies from base image
-COPY --from=base /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=base /bin /bin
-COPY --from=base /usr/bin /usr/bin
-COPY --from=base /usr/local/bin /usr/local/bin
-
+# 2. Copy ONLY the python packages from the builder
+COPY --from=builder /install /usr/local
 COPY . .
 
-# Create log directories and set environment variables for logging
-RUN mkdir -p /app/logs/ && touch /app/logs/application.log
-RUN mkdir -p /var/log/gunicorn
-RUN mkdir -p /var/log/django/
-RUN touch /var/log/django/django.log
+# Setup logs and permissions
+RUN mkdir -p /app/logs/ /var/log/gunicorn /var/log/django/ && \
+    touch /app/logs/application.log /var/log/django/django.log && \
+    chmod +x /app/entrypoint.sh
 
 ENV DJANGO_LOG_FILE=/var/log/django/django.log
-
-# Make entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
-
 EXPOSE 8000
-ENV PORT=8000
 
 ENTRYPOINT [ "bash", "/app/entrypoint.sh" ]
-CMD ["gunicorn", "finfire_whitelable.wsgi:application", "--bind", "0.0.0.0:8000", "--access-logfile", "/var/log/gunicorn/access.log", "--error-logfile", "/var/log/gunicorn/error.log"]
-
+CMD ["gunicorn", "finfire_whitelable.wsgi:application", "--bind", "0.0.0.0:8000"]

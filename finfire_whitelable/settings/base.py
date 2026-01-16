@@ -59,6 +59,8 @@ TENANT_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+
     'registration.apps.RegistrationConfig',
     'iquestions.apps.IquestionsConfig',
     'CM_Market.apps.CmMarketConfig',
