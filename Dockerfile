@@ -14,6 +14,20 @@ FROM --platform=amd64 python:3.11-slim AS base
 #    bash \
 #    && rm -rf /var/lib/apt/lists/*
 #
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libgobject-2.0-0 \
+    libglib2.0-0 \
+    libffi8 \
+    shared-mime-info \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+    
 RUN pip3 install gunicorn
 
 WORKDIR /app
@@ -25,12 +39,26 @@ RUN python3 -m pip install --no-cache-dir -r requirements.txt
 # Runner stage
 FROM --platform=amd64 python:3.11-slim AS runner
 
+# Install runtime system libraries needed by WeasyPrint in the FINAL image
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libgobject-2.0-0 \
+    libglib2.0-0 \
+    libffi8 \
+    shared-mime-info \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy dependencies from base image
 COPY --from=base /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=base /bin /bin
-COPY --from=base /usr/bin /usr/bin
+#COPY --from=base /bin /bin
+#COPY --from=base /usr/bin /usr/bin # this can overwrite binary runners
 COPY --from=base /usr/local/bin /usr/local/bin
 
 COPY . .
