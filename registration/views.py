@@ -102,7 +102,6 @@ def user_logout(request):
 
 @login_required
 def registration_form_view(request):
-
     # Retrieve the existing survey response for the logged-in user
     try:
         response = UserDetail.objects.get(user=request.user)
@@ -122,7 +121,7 @@ def registration_form_view(request):
     except UserDetail.DoesNotExist:
         response = UserDetail(user=request.user)
         initial_data = {
-            'User_Email':request.email,
+            'User_Email':request.user.email,
         }
 
     if request.method == 'POST':
