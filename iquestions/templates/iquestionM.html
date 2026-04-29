@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
+    <title>Intermediaries Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative; /* Ensure container is positioned for absolute positioning inside */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form p {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"] {
+            background-color: #5cb85c; /* Default button color */
+            color: white;
+        }
+        button[type="submit"]:hover {
+            background-color: #4cae4c; /* Hover color for default button */
+        }
+        .logout-button button {
+            background-color: #007bff; /* Blue color for logout button */
+            color: white;
+        }
+        .logout-button button:hover {
+            background-color: #0056b3; /* Darker blue for logout button hover effect */
+        }
+        .logout-button {
+            position: absolute;
+            bottom: 20px; /* Adjust based on your design needs */
+            right: 20px; /* Align to the right */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Intermediaries Questions</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Next</button>
+        </form>
+        <!-- Logout Button -->
+        <div class="logout-button">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

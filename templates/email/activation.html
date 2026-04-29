@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% block subject %}
+{% blocktrans %}Account activation for FINFIRE{% endblocktrans %}
+{% endblock subject %}
+
+{% block text_body %}
+{% blocktrans %}You're receiving this email because you need to finish activation process for FINFIRE Matching app.{% endblocktrans %}
+
+{% trans "Please go to the following page to activate account:" %}
+http://app.finfireapplication.com/{{ url|safe }}
+
+{% trans "Thanks for using our site!" %}
+
+{% blocktrans %}The FINFIRE team{% endblocktrans %}
+{% endblock text_body %}
+
+{% block html_body %}
+<p>{% blocktrans %}You're receiving this email because you need to finish activation process for FINFIRE.{% endblocktrans %}</p>
+
+<p>{% trans "Please go to the following page to activate account:" %}</p>
+<p><a href="http://app.finfireapplication.com/{{ url|safe }}">http://app.finfireapplication.com/{{ url|safe }}</a></p>
+
+<p>{% trans "Thanks for using our site!" %}</p>
+
+<p>{% blocktrans %}The FINFIRE team{% endblocktrans %}</p>
+
+{% endblock html_body %}

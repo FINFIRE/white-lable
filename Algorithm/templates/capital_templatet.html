@@ -1,0 +1,515 @@
+{% load static %}
+{% load custom_filter %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">    
+    <title>Capital Matrix</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        h1 {
+            color: #0077b6;
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        p {
+            font-size: clamp(1em, 2.5vw, 1.1em);
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        a {
+            color: #0077b6;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* Dropdown and Button Styles */
+        select, button {
+            padding: 10px 12px;
+            font-size: clamp(0.9em, 2vw, 1em);
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #ffffff;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        select:hover, button:hover {
+            background-color: #f0f0f0;
+        }
+
+        button {
+            background-color: #0077b6;
+            color: white;
+            border: none;
+        }
+
+        button:active {
+            background-color: #005f88;
+        }
+
+        /* Responsive Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            padding: clamp(8px, 2vw, 12px);
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: clamp(0.8em, 2vw, 1em);
+        }
+
+        th {
+            background-color: #0077b6;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f0f8ff;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            font-size: clamp(0.8em, 2vw, 1em);
+            width: 80px;
+            max-width: 100px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            margin: 2px 0;
+            text-align: center;
+        }
+
+        /* Status Button Styling */
+        #status-button {
+            font-size: clamp(0.8em, 2vw, 1em);
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Total Section Styling */
+        .total-section {
+            margin-top: 20px;
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            font-weight: bold;
+            text-align: left;
+            color: #444;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-section p {
+            margin: 8px 0;
+        }
+
+        /* Form Section */
+        .form-section {
+            margin-top: 20px;
+            background-color: white;
+            padding: clamp(15px, 4vw, 25px);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-row select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-row span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Navigation Block Styles */
+        .nav-block {
+            background-color: #ffffff;
+            padding: clamp(10px, 3vw, 20px);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-logo {
+            margin-bottom: 10px;
+        }
+
+        .nav-logo img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .nav-links a {
+            padding: 10px 15px;
+            background-color: #0077b6;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            max-width: 250px;
+        }
+
+        .nav-links a:hover {
+            background-color: #005f88;
+            text-decoration: none;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+            }
+            
+            .nav-links a {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-row select {
+                min-width: 100%;
+            }
+            
+            .form-row span {
+                justify-content: center;
+            }
+            
+            table {
+                min-width: 500px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 0.8em;
+            }
+            
+            input[type="number"] {
+                width: 60px;
+                font-size: 0.8em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-block {
+                padding: 10px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+            
+            table {
+                min-width: 450px;
+            }
+            
+            th, td {
+                padding: 4px 2px;
+                font-size: 0.7em;
+            }
+            
+            input[type="number"] {
+                width: 50px;
+                font-size: 0.7em;
+                padding: 4px;
+            }
+        }
+
+        /* Status button styles */
+        .status-loaded {
+            background-color: green !important;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 2px 0;
+        }
+        
+        .status-remaining {
+            background-color: red !important;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 2px 0;
+        }
+        
+        .save-button {
+            width: auto;
+            max-width: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        /* Print styles */
+        @media print {
+            .nav-block {
+                display: none;
+            }
+            
+            .table-container {
+                box-shadow: none;
+            }
+            
+            table {
+                min-width: auto;
+            }
+        }
+    </style>
+    <script>
+        // Function to update counter based on matrix weight
+        function updateCounter(row) {
+            const matrixWeight = parseInt(document.getElementById(`matrix_weight-${row}`).value) || 0;
+            const counterInput = document.getElementById(`counter-${row}`);
+            
+            // Set counter to 1 if matrix weight is 8, 9, or 10; otherwise set to 0
+            counterInput.value = (matrixWeight >= 8 && matrixWeight <= 10) ? 1 : 0;
+        }
+
+        // Function to update the values dynamically
+        function updateValues(row) {
+            const score = parseInt(document.getElementById(`score-${row}`).innerText) || 0;
+            const matrixWeight = parseInt(document.getElementById(`matrix_weight-${row}`).value) || 0;
+            
+            // Update counter based on matrix weight
+            updateCounter(row);
+            
+            const counter = parseInt(document.getElementById(`counter-${row}`).value) || 0;
+            const points = score * matrixWeight;
+            const percentage = (points / 10) * 100;
+
+            document.getElementById(`points-${row}`).innerText = points;
+            document.getElementById(`percentage-${row}`).innerText = percentage.toFixed(2) + '%';
+
+            updateTotals();
+        }
+
+        // Function to update the totals dynamically
+        function updateTotals() {
+            // Django template variable - will be replaced with actual number at render time
+            const totalRows = {{ range_list|length }};
+            let totalPercentage = 0;
+            let totalCounter = 0;
+
+            for (let i = 0; i < totalRows; i++) {
+                totalPercentage += parseFloat(document.getElementById(`percentage-${i}`).innerText.replace('%', '')) || 0;
+                totalCounter += parseInt(document.getElementById(`counter-${i}`).value) || 0;
+            }
+        
+            document.getElementById('total-percentage').innerText = totalPercentage.toFixed(2) + '%';
+            document.getElementById('total-counter').innerText = totalCounter;
+        
+            const match = totalCounter > 0 ? (totalPercentage / totalCounter).toFixed(2) : 'N/A';
+            document.getElementById('match').innerText = match;
+        }
+
+        // Function to fetch data based on selected capital
+        function fetchCapitalData() {
+            const selectedCapital = document.getElementById('capital-dropdown').value;
+
+            if (selectedCapital) {
+                fetch(`/fetch-capital-data/?capital=${selectedCapital}`, {
+                    method: 'GET'
+                })
+                .then(response => response.json()) 
+                .then(data => {
+                    // Update the matrix_weight and counter values in the table
+                    // Django template variable - will be replaced with actual number at render time
+                    for (let i = 0; i < {{ range_list|length }}; i++) {
+                        if (data.matrix_weights && data.matrix_weights[i] !== undefined) {
+                            document.getElementById(`matrix_weight-${i}`).value = data.matrix_weights[i];
+                            // Update counter after setting matrix weight
+                            updateCounter(i);
+                        }
+                        updateValues(i);
+                    }
+
+                    // Update the button color based on status (true or false)
+                    const statusButton = document.getElementById('status-button');
+                    const status = data.status; // Assuming `data.status` is a boolean value (true or false)
+
+                    if (status === true) {
+                        statusButton.className = 'status-loaded';
+                        statusButton.innerText = 'Loaded';
+                    } else {
+                        statusButton.className = 'status-remaining';
+                        statusButton.innerText = 'Remaining';
+                    }
+
+                    updateTotals();
+                })
+                .catch(error => console.error('Error fetching data:', error));
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-block">
+            <div class="nav-logo">
+                <a href="{% url 'home' %}"><img src="{% static 'img/b.png' %}" alt="FINFIRE Logo"></a>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'all_percentage' %}">View Capital Matches Score Users</a>                
+                <a href="{% url 'home' %}">Back to Home</a>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <p><b>Please change the Dropdowns to see Algorithm status for your capital type:</b></p>
+            <form method="POST">
+                {% csrf_token %}
+                <!-- Dropdown for Capital Types -->
+                <div class="form-group">
+                    <label for="capital-dropdown">Create Algorithm for:</label>
+                    <div class="form-row">
+                        <select id="capital-dropdown" name="capital-dropdown" onchange="fetchCapitalData()">
+                            <option value="" disabled selected>-- Select a Capital Type to upgrade Algorithm --</option>
+                            {% for clist_item in clist %}
+                            <option value="{{ clist_item.0 }}">{{ clist_item.0 }}</option>
+                            {% endfor %}
+                        </select>
+                        <span>Algorithm Status:
+                            <button type="button" id="status-button" class="{% if status %}status-loaded{% else %}status-remaining{% endif %}">
+                                {% if status %}Loaded{% else %}Remaining{% endif %}
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>S.NO</th>
+                                <th>Options</th>
+                                <th>Score</th>
+                                <th>Matrix Weight</th>
+                                <th>Points</th>
+                                <th>Percentage</th>
+                                <th>Counter</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><b>{{ options|get_at_index:i }}</b></td>
+                                <td id="score-{{ i }}">{{ scores|get_at_index:i }}</td>
+                                <td>
+                                    <input type="number" id="matrix_weight-{{ i }}" name="matrix_weight" min="0" max="10" 
+                                           value="{{ matrix_weights|get_at_index:i }}" oninput="updateValues({{ i }})">
+                                </td>
+                                <td id="points-{{ i }}">0</td>
+                                <td id="percentage-{{ i }}">0%</td>
+                                <td>
+                                    <input type="number" id="counter-{{ i }}" name="counter" min="0" max="1" 
+                                           value="{{ counterlist|get_at_index:i }}" readonly>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="total-section">
+                    <p>Total Percentage: <span id="total-percentage">0%</span></p>
+                    <p>Total Counter: <span id="total-counter">0</span></p>
+                    <p>MATCH: <span id="match">N/A</span></p>
+                </div>
+                
+                <button type="submit" class="save-button">Save</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

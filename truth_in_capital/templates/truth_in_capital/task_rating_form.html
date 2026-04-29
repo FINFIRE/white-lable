@@ -1,0 +1,423 @@
+{% extends 'truth_in_capital/base.html' %} 
+
+{% block title %}Task Rating Form - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-star text-warning"></i> 
+            Task Rating Form
+            {% if selected_user %}
+                for {{ selected_user.username }}
+            {% endif %}
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            {% if selected_user %}
+                <a href="{% url 'truth_in_capital:excel_template_for_user' selected_user.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-table"></i> View Excel Template
+                </a>
+                <a href="{% url 'truth_in_capital:task_list' %}" class="btn btn-outline-primary ms-2">
+                    <i class="fas fa-tasks"></i> View Tasks
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if selected_user %}
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user text-primary"></i> User Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Username:</strong> {{ selected_user.username }}</p>
+                        <p><strong>Email:</strong> {{ selected_user.email }}</p>
+                        <p><strong>Capital Types:</strong> 
+                            {% for capital_type in capital_types %}
+                                <span class="badge bg-info">{{ capital_type.capital_type }}</span>
+                            {% empty %}
+                                <span class="text-muted">No capital types found</span>
+                            {% endfor %}
+                        </p>
+                        <p><strong>Total Tasks:</strong> {{ tasks.count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle text-info"></i> Instructions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In the Rate Task Completion section, you will find tasks that are essential for raising capital. For each task, <strong><i>adjust the slider/ball from 0 to 10 to indicate your perceived level of completion</i></strong>, then click Save Ratings to receive an estimated timeline, cost, and a preliminary work breakdown structure.
+                            <br><br>Please note, this is a rough estimation based on your self-assessment. Our team will review and refine these figures after evaluating your data room to provide a more accurate assessment.</p>
+                        <p class="mb-2"><strong>Rating Scale:</strong></p>
+                        <ul class="mb-0">
+                            <li><strong>0:</strong> Task has not been initiated</li>
+                            <li><strong>1-3:</strong> Task is in early stages</li>
+                            <li><strong>4-6:</strong> Task is partially completed</li>
+                            <li><strong>7-9:</strong> Task is nearly complete</li>
+                            <li><strong>10:</strong> Task is fully completed with no further work needed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit text-success"></i> Rate Task Completion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                            <div class="row">
+                             {% for field in form %}
+                                 <div class="col-md-6 col-lg-4 mb-4">
+                                     <div class="form-group">
+                                        <label for="{{ field.id_for_label }}" class="form-label">
+                                            <strong>{{ field.label|safe }}</strong>
+                                        </label>
+                                         <div class="rating-slider-container">
+                                             <input type="range" 
+                                                    class="form-range rating-slider" 
+                                                    id="{{ field.id_for_label }}_slider"
+                                                    name="{{ field.name }}"
+                                                    min="0" 
+                                                    max="10" 
+                                                    value="{{ field.value|default:0 }}"
+                                                    oninput="updateRatingValue(this, '{{ field.id_for_label }}_display')">
+                                             <div class="d-flex justify-content-between align-items-center mt-2">
+                                                 <span class="rating-value-display" id="{{ field.id_for_label }}_display">{{ field.value|default:0 }}</span>
+                                                 <div class="rating-scale">
+                                                     <small class="text-muted">0</small>
+                                                     <small class="text-muted ms-auto">10</small>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                         {% if field.help_text %}
+                                             <div class="form-text">{{ field.help_text }}</div>
+                                         {% endif %}
+                                         {% if field.errors %}
+                                             <div class="invalid-feedback d-block">
+                                                 {% for error in field.errors %}
+                                                     {{ error }}
+                                                 {% endfor %}
+                                             </div>
+                                         {% endif %}
+                                     </div>
+                                 </div>
+                             {% endfor %}
+                         </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo"></i> Reset Form
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Ratings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if tasks %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list text-primary"></i> Available Tasks for Rating
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Task Name</th>
+                                        <th>Task Type</th>
+                                        <th>Hours</th>
+                                        <th>Precedence</th>
+                                        <th>Current Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in tasks %}
+                                        <tr>
+                                            <td><strong>{{ task.task_name }}</strong></td>
+                                            <td><span class="badge bg-secondary">{{ task.task_type }}</span></td>
+                                            <td><span class="badge bg-info">{{ task.task_max_hour }}h</span></td>
+                                            <td><span class="badge bg-dark">{{ task.task_precedence }}</span></td>
+                                            <td>
+                                                {% if task.rating %}
+                                                    <span class="badge bg-success">{{ task.rating.rating }}/10</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Not Rated</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 300px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -150px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+    }
+
+    .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Rating Slider Styles */
+    .rating-slider-container {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .rating-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: #ddd;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .rating-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    .rating-slider::-webkit-slider-thumb:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+    }
+
+    .rating-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    .rating-slider::-moz-range-thumb:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+    }
+
+    .rating-value-display {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #007bff;
+        min-width: 40px;
+        text-align: center;
+        background: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        white-space: nowrap;
+    }
+
+    .rating-scale {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    /* Color coding for different rating ranges */
+    .rating-slider[data-value="0"]::-webkit-slider-thumb { background: #dc3545; }
+    .rating-slider[data-value="1"]::-webkit-slider-thumb { background: #dc3545; }
+    .rating-slider[data-value="2"]::-webkit-slider-thumb { background: #dc3545; }
+    .rating-slider[data-value="3"]::-webkit-slider-thumb { background: #fd7e14; }
+    .rating-slider[data-value="4"]::-webkit-slider-thumb { background: #fd7e14; }
+    .rating-slider[data-value="5"]::-webkit-slider-thumb { background: #ffc107; }
+    .rating-slider[data-value="6"]::-webkit-slider-thumb { background: #ffc107; }
+    .rating-slider[data-value="7"]::-webkit-slider-thumb { background: #20c997; }
+    .rating-slider[data-value="8"]::-webkit-slider-thumb { background: #20c997; }
+    .rating-slider[data-value="9"]::-webkit-slider-thumb { background: #28a745; }
+    .rating-slider[data-value="10"]::-webkit-slider-thumb { background: #28a745; }
+
+    .rating-slider[data-value="0"]::-moz-range-thumb { background: #dc3545; }
+    .rating-slider[data-value="1"]::-moz-range-thumb { background: #dc3545; }
+    .rating-slider[data-value="2"]::-moz-range-thumb { background: #dc3545; }
+    .rating-slider[data-value="3"]::-moz-range-thumb { background: #fd7e14; }
+    .rating-slider[data-value="4"]::-moz-range-thumb { background: #fd7e14; }
+    .rating-slider[data-value="5"]::-moz-range-thumb { background: #ffc107; }
+    .rating-slider[data-value="6"]::-moz-range-thumb { background: #ffc107; }
+    .rating-slider[data-value="7"]::-moz-range-thumb { background: #20c997; }
+    .rating-slider[data-value="8"]::-moz-range-thumb { background: #20c997; }
+    .rating-slider[data-value="9"]::-moz-range-thumb { background: #28a745; }
+    .rating-slider[data-value="10"]::-moz-range-thumb { background: #28a745; }
+
+    /* Rating value display colors */
+    .rating-value-display[data-value="0"] { color: #dc3545; }
+    .rating-value-display[data-value="1"] { color: #dc3545; }
+    .rating-value-display[data-value="2"] { color: #dc3545; }
+    .rating-value-display[data-value="3"] { color: #fd7e14; }
+    .rating-value-display[data-value="4"] { color: #fd7e14; }
+    .rating-value-display[data-value="5"] { color: #ffc107; }
+    .rating-value-display[data-value="6"] { color: #ffc107; }
+    .rating-value-display[data-value="7"] { color: #20c997; }
+    .rating-value-display[data-value="8"] { color: #20c997; }
+    .rating-value-display[data-value="9"] { color: #28a745; }
+    .rating-value-display[data-value="10"] { color: #28a745; }
+</style>
+
+<script>
+    function updateRatingValue(slider, displayId) {
+        const display = document.getElementById(displayId);
+        const value = slider.value;
+        
+        // Update the display value
+        display.textContent = value;
+        display.setAttribute('data-value', value);
+        
+        // Update slider data attribute for color coding
+        slider.setAttribute('data-value', value);
+        
+        // Add visual feedback
+        display.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            display.style.transform = 'scale(1)';
+        }, 150);
+    }
+
+    function resetForm() {
+        if (confirm('Are you sure you want to reset all ratings to their default values?')) {
+            // Reset all sliders to default value (0)
+            const sliders = document.querySelectorAll('.rating-slider');
+            sliders.forEach(slider => {
+                slider.value = 0;
+                updateRatingValue(slider, slider.id.replace('_slider', '_display'));
+            });
+        }
+    }
+
+    // Initialize sliders on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const sliders = document.querySelectorAll('.rating-slider');
+        
+        sliders.forEach(slider => {
+            const displayId = slider.id.replace('_slider', '_display');
+            const display = document.getElementById(displayId);
+            
+            // Set initial data attributes for color coding
+            slider.setAttribute('data-value', slider.value);
+            display.setAttribute('data-value', slider.value);
+            
+            // Add change event listener for better UX
+            slider.addEventListener('change', function() {
+                updateRatingValue(this, displayId);
+            });
+        });
+        
+        // Add keyboard navigation support
+        sliders.forEach(slider => {
+            slider.addEventListener('keydown', function(e) {
+                let newValue = parseInt(this.value);
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        newValue = Math.max(0, newValue - 1);
+                        break;
+                    case 'ArrowRight':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        newValue = Math.min(10, newValue + 1);
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        newValue = 0;
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        newValue = 10;
+                        break;
+                }
+                
+                if (newValue !== parseInt(this.value)) {
+                    this.value = newValue;
+                    updateRatingValue(this, this.id.replace('_slider', '_display'));
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

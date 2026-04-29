@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block main %}
+<div style="margin: 0 auto; padding: 20px; max-width: 80%; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
+{% block heading %}<h1>Response Summary</h1>{% endblock heading %}
+
+<ol>
+    <h2 style="text-align: center;"><b>Contact Information</b></h2>
+    <b><li>First Name :</b> {{ first_name }}</li>
+    <b><li>Middle Name :</b> {{ middle_name }}</li>
+    <b><li>Last Name :</b> {{ last_name }}</li>
+    <b><li>Affiliation :</b> {{ affiliation }}</li>
+    <b><li>Primary Email :</b> {{ primary_email }}</li>
+    <b><li>Company Website Domain :</b> {{ website }}</li>
+    <b><li>Primary Business Adress :</b> {{ address }}</li>
+    <b><li>Business Phone Number :</b> {{ business_phone }}</li>
+    <b><li>Mobile Phone Number :</b> {{ mobile_phone }}</li>
+    <b><li>Special Program Qualification :</b> {{ special_program }}</li>
+    <h2 style="text-align: center;"><b>Account</b></h2>
+    <b><li>The Primary Purpose of Using the FINFIRE App :</b> {{ primary_purpose }}</li>
+    <b><li>Account Type:</b> {{ account_type }}</li>
+    <b><li>Billing Option</b> {{ billing_option }}</li>
+    <h2 style="text-align: center;"><b>Stage</b></h2>
+    <b><li>What is the state of business development?: </b> {{ stage }}</li>
+    <h2 style="text-align: center;"><b>Entity</b></h2>
+    <b><li>What is the name of business entity?: </b> {{ entity_name }}</li>
+    <b><li>State of entity registration: </b> {{ entity_state }}</li>
+    <b><li>What Type of Business Entity?: </b> {{ entity_type }}</li>
+    <h2 style="text-align: center;"><b>Pre-Capital</b></h2>
+    <b><li>How Much Total Capital has Been Raised to Date?: </b> {{ raised_capital }}</li>
+    <h2 style="text-align: center;"><b>Pre-Market Capital Type</b></h2>
+    <b><li>Which Capital Markets Have Been Utilized To Date?: </b> {{ capital_till_date }}</li>   
+    <h2 style="text-align: center;"><b>Ammount of Planned Raise</b></h2>
+    <b><li>How Much Total Capital is to be Raised in the Next 12 Months?: </b> {{ planned_raise }}</li>
+    <h2 style="text-align: center;"><b>Rounds of Capital</b></h2>
+    <b><li>What Round of Capital Is the Business Engaged In Now?: </b> {{ round_type }}</li>
+    <b><li>How Many Tranches/Rounds of Capital Will Be Raised in the Next 12 Months?: </b> {{ round_tranches }}</li>
+    <h2 style="text-align: center;"><b>Use of Funds</b></h2>
+    <b><li>What Are the Primary Uses of Funds?: </b> {{ use_of_funds }}</li>
+    <h2 style="text-align: center;"><b>Risk Assessment</b></h2>
+    <b><li>What level of Capital Risk Tolerance of the Lender and/or Investor is required?: </b> {{ risk_tolerance_investor }}</li>
+    <h2 style="text-align: center;"><b>Capital Cost</b></h2>
+    <b><li>What is the level of Capital Cost Tolerance of the Founder/Entrepreneur/Principle: </b> {{ risk_tolerance_enterprise }}</li>
+    <h2 style="text-align: center;"><b>Up front costs</b></h2>
+    <b><li>What is the the range of your expectation of costs associated with raising capital including the hiring of intermediaries, financing fees, and other 'UP FRONT Costs of Capital' Considerations?: </b> {{ up_front_cost }}</li>
+    <h2 style="text-align: center;"><b>Up front Timming</b></h2>
+    <b><li>The timing of finance is also a critical factor in determining capital type (How long will the process take from application to capital). From start to finish, what time-frame will be acceptable to complete the application, interviews, forms, due diligence, presentation materials, supporting materials, data room creation, review, analysis, introduction to capital markets & Capitalization?: </b> {{ up_front_timming }}</li>
+    <h2 style="text-align: center;"><b>Documents Prepared</b></h2>
+    <b><li>Summary of Offering: </b> {% if summary_of_offering == 1 %} Your Summary of Offering is present. {% else %} Your summary of Offering is not present. {% endif %}</li>
+    <b><li>Financial Forecasts, Pro forma with Valuation - Opinion Letter & Final Valuation Write-Up: </b> {% if financials == 1 %} The documents regarding financial is present. {% else %} The documents regarding Financial is not present. {% endif %}</li>
+    <b><li>Lean Business Model Canvas: </b> {% if lean_business_model_canvas == 1 %} Your Lean Business Model Canvas is present. {% else %}Your Lean Business Model Canvas is not present.{% endif %}</li>
+    <b><li>Presentation Deck: </b> {% if presentation_deck == 1 %} Your Presentation Deck is present. {% else %} Your Presentation Deck is not Present. {% endif %}</li>
+    <b><li>Leadership Overview: </b> {% if leadership_overview == 1 %} Your Leadership Overview documents is ready. {% else %} Your Leadership documents is not ready. {% endif %}</li>
+    <b><li>Exit Strategy: </b> {% if exit_strategy == 1 %} Your exit strategy documents is complete. {% else %} Your exit strategy documents is not complete. {% endif %}</li>
+    <b><li>Offering Documents: </b> {% if offering_documents == 1 %} Your offering documents is complete. {% else %} Your offering documents is not complete. {% endif %}</li>
+    <b><li>AI Generated Deep Dive: </b> {% if ai_generated_deep_dive == 1 %} You have a complete AI generated documentation. {% else %} You do not have an AI generated documentation {% endif %}</li>
+    <b><li>Virtual Data Room: </b> {% if virtual_data_room == 1 %} You have a virtual data room. {% else %} You do not have a virtual data room. {% endif %}</li>
+</ol>
+</div>
+{% endblock main %}

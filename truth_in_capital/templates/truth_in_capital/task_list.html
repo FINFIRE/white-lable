@@ -1,0 +1,193 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Tasks - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        {% if capital_type %}
+            Tasks for {{ capital_type.capital_type }}
+        {% else %}
+            All Tasks
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0 flex-wrap">
+        {% if capital_type %}
+            <a href="{% url 'truth_in_capital:task_create_for_capital_type' capital_type.pk %}" class="btn btn-success mb-1">
+                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">New Task</span>
+                <span class="d-sm-none">New</span>
+            </a>
+            <a href="{% url 'truth_in_capital:capital_type_list' %}" class="btn btn-outline-secondary ms-2 mb-1">
+                <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline">Back to Capital Types</span>
+                <span class="d-sm-none">Back</span>
+            </a>
+        {% else %}
+            <a href="{% url 'truth_in_capital:task_create' %}" class="btn btn-success mb-1">
+                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">New Task</span>
+                <span class="d-sm-none">New</span>
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if tasks %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tasks text-success"></i> 
+                        {% if capital_type %}
+                            Tasks ({{ tasks.count }})
+                        {% else %}
+                            All Tasks ({{ tasks.count }})
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tasks-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Task Name</th>
+                                    <th>Hours</th>
+                                    {% if not capital_type %}
+                                        <th>Capital Type</th>
+                                    {% endif %}
+                                    <th>Task Type</th>
+                                    <th>Rating</th>
+                                    <th style="width: 150px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasks-tbody">
+                                {% for task in tasks %}
+                                    <tr data-task-id="{{ task.pk }}">
+                                        <td>
+                                            <span class="badge bg-secondary">{{ task.task_precedence }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ task.task_name }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ task.task_max_hour }}h</span>
+                                        </td>
+                                        {% if not capital_type %}
+                                            <td>{{ task.capital_type.user}} : {{ task.capital_type.capital_type }}</td>
+                                        {% endif %}
+                                        <td>
+                                            {{ task.task_type }}
+                                        </td>
+                                        <td>
+                                            {% for rating_item in ratings %}
+                                                {% if rating_item.task == task %}
+                                                    {{ rating_item.rating }}
+                                                {% endif %}
+                                            {% empty %}
+                                                -
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'truth_in_capital:task_update' task.pk %}" class="btn btn-outline-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'truth_in_capital:task_delete' task.pk %}" class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                                {% if task.rating %}
+                                                    <a href="{% url 'truth_in_capital:rating_update' task.rating.pk %}" class="btn btn-outline-primary" title="Edit Rating">
+                                                        <i class="fas fa-star"></i>
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{% url 'truth_in_capital:rating_create' %}?task_id={{ task.pk }}" class="btn btn-outline-primary" title="Add Rating">
+                                                        <i class="fas fa-star"></i>
+                                                    </a>
+                                                {% endif %}
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">No Tasks Yet</h3>
+        <p class="text-muted">
+            {% if capital_type %}
+                No tasks have been created for "{{ capital_type.capital_type }}" yet.
+            {% else %}
+                No tasks have been created yet.
+            {% endif %}
+        </p>
+        <a href="{% url 'truth_in_capital:task_create' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create Your First Task
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if tasks %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('tasks-tbody');
+    if (tbody) {
+        new Sortable(tbody, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function(evt) {
+                const taskIds = Array.from(tbody.querySelectorAll('tr')).map(row => row.dataset.taskId);
+                
+                fetch('{% url "truth_in_capital:reorder_tasks" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: 'task_ids[]=' + taskIds.join('&task_ids[]=')
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update precedence numbers
+                        const rows = tbody.querySelectorAll('tr');
+                        rows.forEach((row, index) => {
+                            const badge = row.querySelector('.badge');
+                            if (badge) {
+                                badge.textContent = index + 1;
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sortable-ghost {
+    opacity: 0.5;
+    background-color: #f8f9fa;
+}
+.table tbody tr {
+    cursor: move;
+}
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,.075);
+}
+</style>
+{% endblock %} 

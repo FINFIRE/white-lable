@@ -36,14 +36,22 @@ SHARED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authusers.apps.AuthusersConfig',
 
 
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'django_extensions',
+    'debug_toolbar',
+    'drf_yasg',
+    'drf_spectacular',
+    'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+
+
+    'Algorithm.apps.AlgorithmConfig',
 
 )
 
@@ -58,11 +66,18 @@ TENANT_APPS = (
     'django.contrib.staticfiles',
 
 
-    'authusers.apps.AuthusersConfig',
+    'registration.apps.RegistrationConfig',
+    'iquestions.apps.IquestionsConfig',
+    'CM_Market.apps.CmMarketConfig',
+    'entreprise_questions.apps.EntrepriseQuestionsConfig',
+    'connections.apps.ConnectionsConfig',
+    'master_review.apps.MasterReviewConfig',
+    'Matching_Algorithm.apps.MatchingAlgorithmConfig',
+    'truth_in_capital.apps.TruthInCapitalConfig',
+
     'rest_framework_simplejwt.token_blacklist',
 
-
-
+    'djoser',
 
 )
 
@@ -72,14 +87,16 @@ INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in S
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'finfire_whitelable.urls'
@@ -91,6 +108,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -98,10 +116,6 @@ TEMPLATES = [
         },
     },
 ]
-
-
-
-AUTH_USER_MODEL = 'authusers.CustomUser'
 
 
 WSGI_APPLICATION = 'finfire_whitelable.wsgi.application'
@@ -112,8 +126,31 @@ REST_FRAMEWORK = {
     "NON_FIELD_ERROR_KEY": "error",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.MultiPartRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+    ],
     # 'EXCEPTION_HANDLER': 'utils.error_handler.custom_exception_handler',
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "FINFIRE API",
+    "DESCRIPTION": "FINFIRE api doc for front end.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 
@@ -129,7 +166,20 @@ DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
 )
 
-
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'resetPasswordConfirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'ACTIVATION_URL': 'userActivate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'EMAIL': {
+        'activation': 'finfire_whitelable.djoser_overrides.CustomActivationEmail',
+        'password_reset': 'finfire_whitelable.djoser_overrides.CustomPasswordResetEmail',
+    },
+    'SERIALIZERS': {
+        'user': 'finfire_whitelable.djoser_overrides.CustomUserSerializer',
+        'current_user': 'finfire_whitelable.djoser_overrides.CustomUserSerializer',
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -183,10 +233,20 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "static"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+INTERNAL_IPS = ['127.0.0.1']
+
+# Webhook (per-tenant override possible via env)
+PAYLOAD_WEBHOOK_URL = env('PAYLOAD_WEBHOOK_URL', default='https://hook.us2.make.com/hn4fn71gzd7kvamax4ye5hissivcizz2')
+PAYLOAD_WEBHOOK_TIMEOUT = env.int('PAYLOAD_WEBHOOK_TIMEOUT', default=30)
+PAYLOAD_WEBHOOK_RETRY_ATTEMPTS = env.int('PAYLOAD_WEBHOOK_RETRY_ATTEMPTS', default=3)
 
 TENANT_MODEL = "tenants.Client" # app.Model
 

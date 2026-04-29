@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block heading %}
+    Login
+{% endblock %}
+
+{% block ddinfo %}
+    <p>Please enter your login credentials to access your account.</p>
+{% endblock %}
+
+{% block main %}
+<p><b>Please enter your login credentials to access your account.</b></p>
+<form method="post" action="{% url 'login_view' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% block button %}
+    <button type="submit" style="
+      padding: 10px 25px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      Login
+    </button>
+    <div style="margin-top: 10px; color: #666; font-size: 14px;">
+      After entering your username and password, click the Login button above to access your account.
+    </div>
+    {% endblock %}
+</form>
+<ul>
+    <li><a href="{% url 'registration' %}">Don't have an account? Register here</a></li>
+    <li><a href="{% url 'password_reset' %}">Forgot Password?</a></li>
+</ul>
+
+<style>
+  button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}

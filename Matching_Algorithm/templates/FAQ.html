@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+    {% block title %}<title>FAQ</title>{% endblock title %}
+
+<body>
+    {% block main %}
+    <h1>FAQs</h1>
+    <p>You can view the frequently asked questions link on your capital type to get answers regarding commonly asked questions. Please select the link for Frequently Asked Question for your capital types.</p>
+    <ol>
+    {% for link in list_name_output %}
+    {% with link|add:'faq' as modified_link %}
+        {% if modified_link in links_with_error %}
+            <li>Paul and Romin are adding the frequently asked Question for {{ link }} to the system!</li>
+        {% else %}
+            <li><a href="{% url modified_link %}">{{ link }}</a></li>
+        {% endif %}
+    {% endwith %}
+    {% endfor %}
+    </ol>
+    <div class="development-note">
+        <p><i><b><u>Development Note: Only the matched capital types FAQ link will be loaded here.</u></b></i></p>
+    </div>
+    {% endblock main %}
+</body>
+</html>

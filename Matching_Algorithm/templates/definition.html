@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+    {% block title %}<title>Definitions</title>{% endblock title %}
+
+<body>
+    {% block main %}
+    <h1>Definitions</h1>
+    <p>Based on your responses, we have matched you with the following capital types that align with your response. You can select the link for definitions and information on your capital types.</p>
+    <ol>
+    {% for link in list_name_output %}
+        {% if link in links_with_error %}
+            <li>Paul and Romin are adding the definition for {{ link }} to the system!</li>
+        {% else %}
+            <li><a href="{% url link %}">{{ link }}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ol>
+    <p><i><b><u>Development Note: Only the matched capital types definitions link will be loaded here.</i></b></u></p>
+    {% endblock main %}
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>How did you hear about us?</h2>
+    {% block formarea %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            <label class="form-label" for="id_referral_source">{{ form.referral_source.label }}</label>
+            {{ form.referral_source }}
+            {{ form.referral_source.errors }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="id_referrer_name">{{ form.referrer_name.label }}</label>
+            {{ form.referrer_name }}
+            {{ form.referrer_name.errors }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="id_referral_other">{{ form.referral_other.label }}</label>
+            {{ form.referral_other }}
+            {{ form.referral_other.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    {% endblock formarea %}
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,82 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Time Entries - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Time Entries</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'truth_in_capital:time_create' %}" class="btn btn-warning">
+            <i class="fas fa-plus"></i> New Time Entry
+        </a>
+    </div>
+</div>
+
+{% if times %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock text-warning"></i> Time Entries ({{ times.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Capital Type</th>
+                                    <th>Start Date</th>
+                                    <th>Duration</th>
+                                    <th>Created</th>
+                                    <th style="width: 150px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for time_entry in times %}
+                                    <tr>
+                                        <td>{{ time_entry.capital_type.user}} - {{ time_entry.capital_type.capital_type }}</td>
+                                        <td>
+                                            <strong>{{ time_entry.start_date|date:"M d, Y" }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                {{ time_entry.duration_capital_weeks }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ time_entry.start_date|timesince }} ago
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'truth_in_capital:time_update' time_entry.pk %}" class="btn btn-outline-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'truth_in_capital:time_delete' time_entry.pk %}" class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+        <h3 class="text-muted">No Time Entries Yet</h3>
+        <p class="text-muted">Start tracking your time by creating your first time entry.</p>
+        <a href="{% url 'truth_in_capital:time_create' %}" class="btn btn-warning">
+            <i class="fas fa-plus"></i> Create Your First Time Entry
+        </a>
+    </div>
+{% endif %}
+{% endblock %} 

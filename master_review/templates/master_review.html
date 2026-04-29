@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Superuser Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
+    <center>
+        <div class="logo-wrapper">
+            <a href="{% url 'home' %}" class="logo-container">
+                <img src="{% static 'img/b.png' %}" alt="Logo">
+            </a>
+        </div>
+    </center>
+    <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the element */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Enhanced 3D Logo Styling */
+        .logo-wrapper {
+            perspective: 1000px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo-container {
+            display: inline-block;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+            width: 400px;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 15px rgba(0, 176, 240, 0.2))
+                   drop-shadow(0 5px 8px rgba(0, 0, 0, 0.15));
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .logo-container:hover {
+            transform: translateY(-8px) rotateY(5deg) rotateX(5deg);
+        }
+
+        .logo-container:hover img {
+            filter: drop-shadow(0 20px 25px rgba(0, 176, 240, 0.3))
+                   drop-shadow(0 10px 12px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-container:active {
+            transform: translateY(2px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at center,
+                rgba(0, 176, 240, 0.1) 0%,
+                transparent 70%
+            );
+            top: 20px;
+            left: 0;
+            transform: translateZ(-1px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .logo-container:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes logoFloat {
+            0% {
+                transform: translateY(0) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-5px) rotateY(2deg);
+            }
+            100% {
+                transform: translateY(0) rotateY(0deg);
+            }
+        }
+
+        .logo-container {
+            animation: logoFloat 6s ease-in-out infinite;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo-container {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                width: 250px;
+            }
+        }
+
+        /* New Dashboard Styles */
+        body {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            border-radius: 12px;
+        }
+
+        h1, h2, h3 {
+            color: #1a237e;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 3px solid #1a237e;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .list-group-item {
+            border: none;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px !important;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .list-group-item form {
+            margin-top: 1rem;
+        }
+
+        button[type="submit"] {
+            background-color: #1a237e;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #283593;
+        }
+
+        .btn-primary {
+            background-color: #1a237e;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: #283593;
+        }
+
+        /* Form styling */
+        form p {
+            margin-bottom: 1.2rem;
+        }
+
+        form label {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 0.25rem;
+        }
+
+        /* Radio and Checkbox alignment fixes */
+        input[type="radio"],
+        input[type="checkbox"] {
+            width: auto;
+            vertical-align: middle;
+            margin: 0 8px 0 0;
+            position: relative;
+            top: -1px;
+        }
+
+        /* Label styling for radio and checkbox options */
+        form ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        form ul li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        form ul li label {
+            margin: 0;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /* Override the width: 100% for radio/checkbox inputs */
+        form ul li input[type="radio"],
+        form ul li input[type="checkbox"] {
+            width: auto;
+        }
+
+        /* Section headers (only direct header titles, not labels) */
+        .list-group-item > b > u {
+            color: #1a237e;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        /* Keep inline formatting for label titles so the colon stays inline */
+        label b u { display: inline; margin: 0; }
+
+        /* Letter content section */
+        .border.p-3 {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 2rem !important;
+        }
+
+        /* Download link styling */
+        a[href*="download_file"] {
+            display: inline-block;
+            margin: 1rem 0;
+            color: #1a237e;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 2px solid #1a237e;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        a[href*="download_file"]:hover {
+            background-color: #1a237e;
+            color: white;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .list-group-item {
+                padding: 1rem;
+            }
+        }
+
+        /* Ensure dropdowns are not clipped and open downward */
+        form select {
+            position: relative;
+            z-index: 10;
+            background: #fff;
+        }
+
+        /* Make sure parent containers don't clip the dropdown */
+        .container, .mb-3, .list-group-item {
+            overflow: visible !important;
+        }
+
+        /* Optional: Style the select for better appearance */
+        form select {
+            border: 1px solid #1a237e;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            background-color: #fff;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: border-color 0.2s;
+        }
+        form select:focus {
+            border-color: #283593;
+            outline: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* Ensure Django label suffix ":" stays on same line */
+        form p > label { display: inline; margin-bottom: 0; }
+        /* Tooltip overrides to avoid Bootstrap .tooltip conflicts */
+        .container .tooltip { position: relative !important; display: inline-block; cursor: pointer; }
+        .container .tooltip .tooltip-text {
+            visibility: hidden; width: 220px; background: #555; color: #ffffff; text-align: center;
+            border-radius: 6px; padding: 6px 8px; position: absolute; z-index: 2000; bottom: 125%; left: 50%;
+            transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: normal;
+        }
+        .container .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <b><u><h1>Superuser Dashboard </h1></b></u>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.user.id_for_label }}">Select User</label>
+                {{ form.user }}
+            </div>
+            <button type="submit" class="btn btn-primary">View Responses</button>
+        </form>
+        <a href="{% url 'download_file' %}">Download FINFIRE AGREEMENT</a>
+        {% if selected_user %}
+            <h2 class="mt-4">Responses for {{ selected_user.username }}</h2>
+            {% if responses %}
+                <form method="post" id="unified-form">
+                    {% csrf_token %}
+                    <ul class="list-group" style="text-align: left;">
+                        
+                            <li class="list-group-item">
+                                <b><u>SECTION 1-Registration Contact Information</u></b>
+                                {{ form2.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>SECTION 2-FINFIRE 12 VARIABLES</u></b>
+                                <br><b><u>Stage</u></b>
+                                {{ form3.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <br><b><u>Entity</u></b>
+                                {{ form4.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Pre-Capital</u></b>
+                                {{ form5.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Pre-Market Capital Type</u></b>
+                                {{ form6.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Amount of Planned Raise</u></b>
+                                {{ form7.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Rounds of Capital</u></b>
+                                {{ form8.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Use of Funds</u></b>
+                                {{ form9.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Risk Assessment and Capital Cost</u></b>
+                                {{ form10.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Up Front Costs</u></b>
+                                {{ form11.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Timing</u></b>
+                                {{ form12.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Documents Prepared</u></b>
+                                {{ form13.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Referral Response</u></b>
+                                {{ form15.as_p }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>Lending Informations</u></b>
+                                {{ form16.as_p }}
+                            </li>                            
+                            <li class="list-group-item">
+                                <b><u>Assign Manual Top 5 Ranking for the selected User</u></b>
+                                <p><b>**Developers Note:**</b>This section is to be used to assign users capital type manually without implementing the algorithm. By default the first capital type is loaded.</p>
+                                <p>There are very different letters and responses because of the users being registered at different time of development. We can manually trigger match functions for the user and sync them to the lates later, if we want.</p>
+                                <p>Alternatively, Users can click match in their account and sync them to latest changes.</p>
+                                {{ form14.as_p }}
+                            </li>                                                                                                                                                                                                                  
+                                <!--<b><u>SECTION 1-Registration Contact Information</u></b>
+                                <br>First Name: {{ response.First_Name }}
+                                <br>Middle Name: {{ response.Middle_Name }}
+                                <br>Last Name: {{ response.Last_Name }}
+                                <br>Affiliation: {{ response.Affiliation }}
+                                <br>Primary Email Address: {{ response.User_Email }}
+                                <br>Website Domain: {{ response.Company_Website }}
+                                <br>Primary Business Adress: {{ response.Business_Adress }}
+                                <br>Business Phone Number: {{ response.Business_Phone }}
+                                <br>Mobile Phone Number: {{ response.Mobile_Phone }}
+                                <br>Special Program Qualifications: {{ response.Special_Programs }}
+                            </li>
+                            <li class="list-group-item">
+                                <b><u>SECTION 2 – FINFIRE 12 VARIABLES</u></b>
+                                <br><b>1. What is the Stage of Business Development?</b>: {{ stage }}
+                            </li>
+                            <li class="list-group-item">
+                                <br><b>2. Entinty Information</b>
+                                <br>What is the name of the business Entinty?: {{ entity_name }}
+                                <br>State of Entity Registration (Or, Country if Outside the USA): {{ entity_state }}
+                            </li>-->                             
+                        
+                    </ul>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Save All Changes</button>
+                    </div>
+                </form>
+                <!-- Manual Match Button and User Dropdown -->
+                <form method="post" action="{% url 'manual_match' %}" class="mb-4">
+                    {% csrf_token %}
+                        <option value="{{ user.id }}">{{ selected_user }}</option>                
+                    <button type="submit" class="btn btn-primary">Match Manually</button>
+                </form>
+                <b><u><h3 class="mt-4">Letter Content</h3></u></b>
+                <div class="border p-3">
+                    <!-- Render the HTML content safely -->
+                    {{ letter_content|safe }}
+                </div>
+            {% endif %}    
+        {% endif %}
+    </div>
+</body>
+</html>

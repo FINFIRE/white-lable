@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block User %}
+<style>
+  a:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+</style>
+{% if request.user.is_authenticated %}
+  <div style="max-width: 600px; margin: 20px auto; padding: 20px;">
+    <h1 style="color: #333; margin-bottom: 20px;">Welcome, {{ request.user.username }}!</h1>
+    
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+        Ready to start your journey? Take our matching survey to find your perfect match.
+      </div>
+      <a href="{% url link %}" style="
+        display: block;
+        padding: 15px 25px;
+        background-color: #2196F3;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        Start Your Matching Survey
+      </a>
+
+      <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+        Need to sign out? Click here to securely log out of your account.
+      </div>
+      <a href="{% url 'logout_view' %}" style="
+        display: block;
+        padding: 15px 25px;
+        background-color: #f44336;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        Logout
+      </a>
+      
+      {% if request.user.username == "tonyfinfire" or request.user.username == "rominadmin" or request.user.username == "sam" or request.user.is_staff == True %}
+        <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+          As an administrator, you can create and manage algorithm matrices for matching.
+        </div>
+        <a href="{% url 'capitalview' %}" style="
+          display: block;
+          padding: 15px 25px;
+          background-color: #9C27B0;
+          color: white;
+          text-decoration: none;
+          border-radius: 5px;
+          text-align: center;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Create Your Algorithm
+        </a>
+
+        <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+          Review and manage all user accounts and their matching data.
+        </div>
+        <a href="{% url 'master-review' %}" style="
+          display: block;
+          padding: 15px 25px;
+          background-color: #607D8B;
+          color: white;
+          text-decoration: none;
+          border-radius: 5px;
+          text-align: center;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Review All Users
+        </a>
+        <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+          Go to the new Dashboard for truth in capital.
+        </div>
+        <a href="{% url 'truth_in_capital:dashboard' %}" style="
+          display: block;
+          padding: 15px 25px;
+          background-color: #efeb04;
+          color: white;
+          text-decoration: none;
+          border-radius: 5px;
+          text-align: center;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+          box-shadow: 0 2px 4px white;">
+          Truth in Capital
+        </a>
+      {% elif request.user.username == "hudson" or request.user.username == "sam" or request.user.is_staff == True %}
+      <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+        Review and manage all user accounts and their matching data.
+      </div>
+      <a href="{% url 'master-review' %}" style="
+        display: block;
+        padding: 15px 25px;
+        background-color: #607D8B;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        Review All Users
+      </a>
+      <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+        Go to the new Dashboard for truth in capital.
+      </div>
+      <a href="{% url 'truth_in_capital:dashboard' %}" style="
+        display: block;
+        padding: 15px 25px;
+        background-color: #efeb04;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px white;">
+        Truth in Capital
+      </a>              
+      {% endif %}
+    </div>
+  </div>
+
+{% else %}
+  <div style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 20px auto;">
+    <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+      Already have an account? Sign in to access your profile and continue your journey.
+    </div>
+    <a href="{% url 'login_view' %}" style="
+      display: block;
+      padding: 15px 25px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      Login to Your Account
+    </a>
+    
+    <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+      New to FinFire? Create an account to start your matching survey and discover your perfect match.
+    </div>
+    <a href="{% url 'registration' %}" style="
+      display: block;
+      padding: 15px 25px;
+      background-color: #2196F3;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      Register New Account
+    </a>
+    
+    <div style="margin-bottom: 5px; color: #666; font-size: 14px;">
+      Can't access your account? Reset your password to regain access to your profile.
+    </div>
+    <a href="{% url 'password_reset' %}" style="
+      display: block;
+      padding: 15px 25px;
+      background-color: #FF9800;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      Forgot Password?
+    </a>
+  </div>
+{% endif %}
+{% endblock User %}

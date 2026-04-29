@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+{% load static %}
+{% block header %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
+    <center>
+        <div class="logo-wrapper">
+            <a href="{% url 'home' %}" class="logo-container">
+                <img src="{% static 'img/b.png' %}" alt="FINFIRE Logo">
+            </a>
+        </div>
+    </center>
+    {% block title %}<title>FINFIRE</title>{% endblock title %}
+    <style>
+    .registration-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.1);
+    }
+
+    .welcome-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+    }
+
+    .welcome-header h2 {
+        color: #ffffff;
+        font-size: 2.4em;
+        margin-bottom: 15px;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .intro-text {
+        font-size: 1.1em;
+        color: #ffffff;
+        margin: 0;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .form-section {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(74, 144, 226, 0.1);
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(74, 144, 226, 0.12);
+    }
+
+    .form-section h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 12px;
+        font-size: 1.4em;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-size: 1.05em;
+    }
+
+    .field-help {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 10px;
+        line-height: 1.5;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+        border-color: #4a90e2;
+        outline: none;
+        box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+        background-color: #ffffff;
+    }
+
+    .password-requirements-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 15px;
+        border: 1px solid rgba(74, 144, 226, 0.1);
+    }
+
+    .requirements-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .password-requirements {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .password-requirements li {
+        margin-bottom: 10px;
+        padding-left: 28px;
+        position: relative;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .password-requirements li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #4a90e2;
+        font-size: 1.2em;
+    }
+
+    .valid {
+        color: #28a745;
+    }
+
+    .valid:before {
+        content: "✓";
+        color: #28a745;
+    }
+
+    .invalid {
+        color: #dc3545;
+    }
+
+    .error-list {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 8px;
+        padding: 8px;
+        background-color: rgba(220, 53, 69, 0.1);
+        border-radius: 4px;
+    }
+
+    .error {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 8px;
+    }
+
+    .form-actions {
+        text-align: center;
+        margin-top: 35px;
+    }
+
+    .submit-button {
+        background: linear-gradient(to right, #4a90e2, #357abd);
+        color: white;
+        padding: 14px 35px;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.2em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
+        background: linear-gradient(to right, #357abd, #2c6aa0);
+    }
+
+    .submit-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(74, 144, 226, 0.2);
+    }
+
+    /* Logo styling */
+    .logo-wrapper {
+        margin: 20px 0;
+    }
+
+    .logo-container {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .logo-container:hover {
+        transform: scale(1.05);
+    }
+
+    .logo-container img {
+        max-width: 120px;
+        height: auto;
+    }
+
+    /* Header styling */
+    h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin: 20px 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Add these new styles for JavaScript interactions */
+    .requirement-update {
+        animation: requirementUpdate 0.3s ease;
+    }
+
+    @keyframes requirementUpdate {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .input-focused {
+        position: relative;
+    }
+
+    .input-focused::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(to right, #4a90e2, #357abd);
+        animation: focusLine 0.3s ease;
+    }
+
+    @keyframes focusLine {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+    }
+
+    .error {
+        animation: errorShake 0.5s ease;
+    }
+
+    @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Password requirement styles */
+    .password-requirements li {
+        transition: all 0.3s ease;
+    }
+
+    .password-requirements li.valid {
+        color: #28a745;
+    }
+
+    .password-requirements li.valid:before {
+        content: "✓";
+        color: #28a745;
+    }
+
+    .password-requirements li.invalid {
+        color: #dc3545;
+    }
+
+    .password-requirements li.invalid:before {
+        content: "•";
+        color: #dc3545;
+    }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const password1 = document.querySelector('input[name="password1"]');
+        const password2 = document.querySelector('input[name="password2"]');
+        const username = document.querySelector('input[name="username"]');
+        const email = document.querySelector('input[name="email"]');
+        const requirements = document.querySelectorAll('.password-requirements li');
+        const errorDiv = document.getElementById('password-errors');
+        const confirmationErrorDiv = document.getElementById('password-confirmation-errors');
+        
+        // List of common passwords to check against
+        const commonPasswords = [
+            'password123', '12345678', 'qwerty123', 'admin123', 'welcome1',
+            'password1', '123456789', 'abc123', 'letmein', 'monkey123'
+        ];
+
+        // Function to update requirement status with animation
+        function updateRequirementStatus(id, isValid) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.className = isValid ? 'valid' : 'invalid';
+                element.classList.add('requirement-update');
+                setTimeout(() => element.classList.remove('requirement-update'), 300);
+            }
+        }
+        
+        if (password1) {
+            password1.addEventListener('input', function() {
+                const value = this.value;
+                const usernameValue = username ? username.value : '';
+                const emailValue = email ? email.value : '';
+                
+                // Validate length
+                updateRequirementStatus('length', value.length >= 8);
+                
+                // Validate uppercase
+                updateRequirementStatus('uppercase', /[A-Z]/.test(value));
+                
+                // Validate lowercase
+                updateRequirementStatus('lowercase', /[a-z]/.test(value));
+                
+                // Validate number
+                updateRequirementStatus('number', /[0-9]/.test(value));
+                
+                // Validate not entirely numeric
+                updateRequirementStatus('not-numeric', !/^\d+$/.test(value));
+                
+                // Validate not common password
+                updateRequirementStatus('not-common', !commonPasswords.includes(value.toLowerCase()));
+                
+                // Validate not similar to personal info
+                const isSimilarToPersonalInfo = (
+                    (usernameValue && value.toLowerCase().includes(usernameValue.toLowerCase())) ||
+                    (emailValue && value.toLowerCase().includes(emailValue.split('@')[0].toLowerCase()))
+                );
+                updateRequirementStatus('not-similar', !isSimilarToPersonalInfo);
+
+                // Show error message if password is too weak
+                if (errorDiv) {
+                    const allValid = Array.from(requirements).every(req => req.classList.contains('valid'));
+                    if (!allValid && value.length > 0) {
+                        errorDiv.innerHTML = '<div class="error">Please ensure your password meets all requirements</div>';
+                    } else {
+                        errorDiv.innerHTML = '';
+                    }
+                }
+            });
+        }
+        
+        if (password2) {
+            password2.addEventListener('input', function() {
+                const password1Value = password1 ? password1.value : '';
+                const password2Value = this.value;
+                
+                if (confirmationErrorDiv) {
+                    if (password2Value && password1Value !== password2Value) {
+                        confirmationErrorDiv.innerHTML = '<div class="error">Passwords do not match</div>';
+                    } else {
+                        confirmationErrorDiv.innerHTML = '';
+                    }
+                }
+            });
+        }
+
+        // Add focus effects to input fields
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('input-focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('input-focused');
+            });
+        });
+
+        // Add form submission validation
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const allRequirementsMet = Array.from(requirements).every(req => req.classList.contains('valid'));
+                const passwordsMatch = password1 && password2 && password1.value === password2.value;
+
+                if (!allRequirementsMet) {
+                    e.preventDefault();
+                    errorDiv.innerHTML = '<div class="error">Please ensure your password meets all requirements</div>';
+                    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else if (!passwordsMatch) {
+                    e.preventDefault();
+                    confirmationErrorDiv.innerHTML = '<div class="error">Passwords do not match</div>';
+                    confirmationErrorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+    });
+    </script>
+    </head>
+    {% endblock header %}
+    <body>
+        {% block headhead %}<center><h1>FINFIRE Inc.</h1></center>
+        <p>{% include "header.html" %}</p>{% endblock headhead %}
+    {% block main %} 
+    <form method="post">
+    {% csrf_token %}
+    <div class="registration-container">
+        <div class="welcome-header">
+            <h2>Welcome to FINFIRE</h2>
+            <p class="intro-text">Create Your New username and a strong password to start your FINFIRE Journey</p>
+        </div>
+        
+        <div class="form-section">
+            <h3>Account Information</h3>
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                <p class="field-help">Choose a unique username that you'll use to log in. This will be visible to other users.</p>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email Address</label>
+                <p class="field-help">Enter your email address. We'll use this to send you important updates and for account recovery.</p>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Create Your Password</h3>
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password</label>
+                <p class="field-help">Create a strong password to protect your account. Follow the requirements below to ensure your password is secure.</p>
+                {{ form.password1 }}
+                <div id="password-errors" class="error-list">
+                    <!-- Live validation errors will appear here -->
+                </div>
+                <div class="password-requirements-container">
+                    <p class="requirements-title"><b>Password Requirements:</b> All items below must turn green for a strong password</p>
+                    <ul class="password-requirements">
+                        <li id="length" class="invalid">At least 8 characters</li>
+                        <li id="uppercase" class="invalid">At least one uppercase letter</li>
+                        <li id="lowercase" class="invalid">At least one lowercase letter</li>
+                        <li id="number" class="invalid">At least one number</li>
+                        <li id="not-numeric" class="invalid">Can't be entirely numeric</li>
+                        <li id="not-common" class="invalid">Can't be a commonly used password</li>
+                        <li id="not-similar" class="invalid">Can't be too similar to personal information</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                <p class="field-help">Enter your password again to confirm it's correct.</p>
+                {{ form.password2 }}
+                <div id="password-confirmation-errors" class="error-list">
+                    <!-- Password confirmation errors will appear here -->
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            {% block button %}<button type="submit" class="submit-button">Create Account</button>{% endblock %}
+        </div>
+        </div>
+    </form>
+{% endblock main %}
+</body>
+</html>

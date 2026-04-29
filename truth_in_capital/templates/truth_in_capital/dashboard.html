@@ -1,0 +1,181 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}Dashboard - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2 flex-wrap">
+            <a href="{% url 'truth_in_capital:capital_type_create' %}" class="btn btn-sm btn-outline-primary mb-1">
+                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">New Capital Type</span>
+                <span class="d-sm-none">Capital Type</span>
+            </a>
+            <a href="{% url 'truth_in_capital:task_create' %}" class="btn btn-sm btn-outline-success mb-1">
+                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">New Task</span>
+                <span class="d-sm-none">Task</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Capital Types Summary -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list text-primary"></i> Capital Types
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if capital_types %}
+                    <div class="list-group list-group-flush">
+                        {% for capital_type in capital_types %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ capital_type.capital_type }}</span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ capital_type.tasks.count }} tasks
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No capital types created yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'truth_in_capital:capital_type_list' %}" class="btn btn-sm btn-primary">
+                    View All Capital Types
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tasks text-success"></i> Recent Tasks
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if capital_types %}
+                    {% for capital_type in capital_types %}
+                        {% if capital_type.tasks.exists %}
+                            <h6 class="text-muted">{{ capital_type.capital_type }}</h6>
+                            <div class="list-group list-group-flush mb-3">
+                                {% for task in capital_type.tasks.all|slice:":3" %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ task.task_name }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ task.task_max_hour }}h | {{ task.task_type }}
+                                            </small>
+                                            <br>
+                                            <small class="text-muted">
+                                                Rating: {% if task.rating_set.first %}{{ task.rating_set.first.rating }}{% else %}-{% endif %}
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-secondary">{{ task.task_precedence }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No tasks created yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'truth_in_capital:task_list' %}" class="btn btn-sm btn-success">
+                    View All Tasks
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Entries -->
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock text-warning"></i> Time Entries
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if times %}
+                    <div class="list-group list-group-flush">
+                        {% for time_entry in times %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ time_entry.start_date }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ time_entry.capital_type.capital_type }}</small>
+                                    </div>
+                                    <span class="text-muted">{{ time_entry.duration_capital_weeks }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No time entries created yet.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'truth_in_capital:time_list' %}" class="btn btn-sm btn-warning">
+                    View All Time Entries
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 col-md-3 mb-2">
+                        <a href="{% url 'truth_in_capital:capital_type_create' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add Capital Type</span>
+                            <span class="d-sm-none">Capital Type</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <a href="{% url 'truth_in_capital:task_create' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add Task</span>
+                            <span class="d-sm-none">Task</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <a href="{% url 'truth_in_capital:time_create' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add Time Entry</span>
+                            <span class="d-sm-none">Time Entry</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <a href="{% url 'truth_in_capital:task_list' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-list"></i> <span class="d-none d-sm-inline">View All Tasks</span>
+                            <span class="d-sm-none">Tasks</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <a href="{% url 'truth_in_capital:rating_list' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-star"></i> <span class="d-none d-sm-inline">View Ratings</span>
+                            <span class="d-sm-none">Ratings</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

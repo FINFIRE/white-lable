@@ -1,0 +1,174 @@
+{% extends 'truth_in_capital/base.html' %}
+
+{% block title %}{{ title }} - Truth in Capital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        {% if task %}
+            <a href="{% url 'truth_in_capital:task_list_by_capital_type' task.capital_type.pk %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Tasks
+            </a>
+        {% elif capital_type %}
+            <a href="{% url 'truth_in_capital:task_list_by_capital_type' capital_type.pk %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Tasks
+            </a>
+        {% else %}
+            <a href="{% url 'truth_in_capital:task_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Tasks
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    {% if task %}
+                        <i class="fas fa-edit text-warning"></i> Edit Task
+                    {% else %}
+                        <i class="fas fa-plus text-success"></i> Create New Task
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if capital_type %}
+                        <!-- Show capital type as read-only when pre-selected -->
+                        <div class="mb-3">
+                            <label class="form-label">Capital Type</label>
+                            <input type="text" class="form-control" value="{{ capital_type }}" readonly>
+                            <input type="hidden" name="capital_type" value="{{ capital_type.pk }}">
+                            <div class="form-text">This task will be created for the selected capital type.</div>
+                        </div>
+                    {% else %}
+                        <!-- Show capital type dropdown when not pre-selected -->
+                        <div class="mb-3">
+                            <label for="{{ form.capital_type.id_for_label }}" class="form-label">
+                                {{ form.capital_type.label }}
+                            </label>
+                            {{ form.capital_type }}
+                            {% if form.capital_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.capital_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.capital_type.help_text %}
+                                <div class="form-text">{{ form.capital_type.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.task_name.id_for_label }}" class="form-label">
+                            {{ form.task_name.label }}
+                        </label>
+                        {{ form.task_name }}
+                        {% if form.task_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.task_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.task_name.help_text %}
+                            <div class="form-text">{{ form.task_name.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.task_max_hour.id_for_label }}" class="form-label">
+                            {{ form.task_max_hour.label }}
+                        </label>
+                        {{ form.task_max_hour }}
+                        {% if form.task_max_hour.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.task_max_hour.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.task_max_hour.help_text %}
+                            <div class="form-text">{{ form.task_max_hour.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.task_precedence.id_for_label }}" class="form-label">
+                            {{ form.task_precedence.label }}
+                        </label>
+                        {{ form.task_precedence }}
+                        {% if form.task_precedence.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.task_precedence.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.task_precedence.help_text %}
+                            <div class="form-text">{{ form.task_precedence.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.task_type.id_for_label }}" class="form-label">
+                            {{ form.task_type.label }}
+                        </label>
+                        {{ form.task_type }}
+                        {% if form.task_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.task_type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.task_type.help_text %}
+                            <div class="form-text">{{ form.task_type.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            {% if task %}
+                                <i class="fas fa-save"></i> Update Task
+                            {% else %}
+                                <i class="fas fa-plus"></i> Create Task
+                            {% endif %}
+                        </button>
+                        <a href="{% if task %}{% url 'truth_in_capital:task_list_by_capital_type' task.capital_type.pk %}{% elif capital_type %}{% url 'truth_in_capital:task_list_by_capital_type' capital_type.pk %}{% else %}{% url 'truth_in_capital:task_list' %}{% endif %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control {
+        border-radius: 0.375rem;
+    }
+    .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+</style>
+{% endblock %} 
