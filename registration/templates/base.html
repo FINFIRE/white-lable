@@ -435,9 +435,8 @@ function attachPhoneFormatter(inputId) {
     if (!input) return;
 
     input.addEventListener('input', function () {
-        const cursorPosition = input.selectionStart;
+        
         input.value = formatPhoneNumber(input.value);
-        input.setSelectionRange(cursorPosition, cursorPosition);
     });
 }
 

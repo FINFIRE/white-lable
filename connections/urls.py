@@ -5,9 +5,10 @@ from .views import UserDetailAPIView,UserDetail2APIView,EQuestionsAPIView,EQuest
 EQuestions3APIView,EQuestions4APIView,EQuestions5APIView,EQuestions6APIView,EQuestions7APIView,\
 EQuestions8APIView,DocumentsPreparedAPIView,EQuestions9APIView,EQuestions10APIView,EQuestions11APIView,EQuestions12APIView,\
 EQuestions13APIView,EQuestions14APIView,IQuestions1APIView,IQuestions2APIView,VQuestion1APIView,MatchDataRetrieveEfficientListView,MatchDataRetrieveEfficientListViewPdf\
-,payLoadView,referalResponseAPIView,preRatingAPIView#PurchasesListCreateView,PurchasesRetrieveUpdateDestroyView
+,payLoadView,referalResponseAPIView,preRatingAPIView,LendingRequirementsAPIView#PurchasesListCreateView,PurchasesRetrieveUpdateDestroyView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from Matching_Algorithm.views import pdf
+from .admin_views import AdminUserListCreateView, AdminActivateUserView, AdminUserAllDataView, AdminUserStepDataView, AdminMatchPDFView
 
 
 router = routers.DefaultRouter()
@@ -44,6 +45,13 @@ urlpatterns +=[
     path('match-letter-pdf',MatchDataRetrieveEfficientListViewPdf.as_view({'get':'get'}),name='match_datae_list_pdf'),
     path('pay-load-string',payLoadView.as_view({'get':'list','post':'create'}),name='pay_load_string'),
     #path('match-datae/<int:user_id>', MatchDataRetrieveEfficientListView.as_view(), name='match_datae_detail'), 
+    path('lending-info',LendingRequirementsAPIView.as_view({'get':'list','post':'create'}),name='lending_info'),
+    # Admin-only endpoints
+    path('admin/users', AdminUserListCreateView.as_view(), name='admin_user_list_create'),
+    path('admin/users/<int:user_id>/activate', AdminActivateUserView.as_view(), name='admin_activate_user'),
+    path('admin/users/<int:user_id>/data', AdminUserAllDataView.as_view(), name='admin_user_all_data'),
+    path('admin/users/<int:user_id>/data/<str:step_key>', AdminUserStepDataView.as_view(), name='admin_user_step_data'),
+    path('admin/users/<int:user_id>/match-pdf', AdminMatchPDFView.as_view(), name='admin_match_pdf'),
     path('auth/',include('djoser.urls')),
     path('auth/',include('djoser.urls.authtoken'))
     #path('purchases/', PurchasesListCreateView.as_view(), name='purchases-list-create'),

@@ -1,7 +1,7 @@
 from registration.models import UserDetail, UserDetail2
 from entreprise_questions.models import EQuestions,EQuestions1,EQuestions2,EQuestions3,EQuestions4,EQuestions5,\
 EQuestions6,EQuestions7,EQuestions8,EQuestions9,EQuestions10,EQuestions11,EQuestions12,EQuestions13,\
-EQuestions14,DocumentsPrepared,ReferalResponse,PreRating
+EQuestions14,DocumentsPrepared,ReferalResponse,PreRating,LendingRequirements
 from iquestions.models import IQuestions1,IQuestions2
 from CM_Market.models import VQuestion1
 from connections.models import Match_Data,pay_load_string
@@ -47,14 +47,14 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 # For Account in Front end
 class UserDetail2Serializer(serializers.ModelSerializer):
+    accountType = serializers.CharField(max_length=200, source='Account_Type')
     primaryAppUse = serializers.ListField(
-        child=serializers.CharField(max_length=200),source='Primary_Purpose'
+        child=serializers.CharField(max_length=200), source='Primary_Purpose'
     )
 
-    #Accouunt_Type & Billing_Option not mapped yet in front end
     class Meta:
         model = UserDetail2
-        fields = ['primaryAppUse']
+        fields = ['accountType', 'primaryAppUse']
 
 class EQuestionsSerializer(serializers.ModelSerializer):
     rangeofCost = serializers.CharField(max_length=200,source='Selected_Option')
@@ -473,3 +473,17 @@ class preRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreRating
         fields = ['preratings']
+
+# For Lending Information in front end
+class LendingRequirementsSerializer(serializers.ModelSerializer):
+    collateralStatus = serializers.CharField(max_length=255, source='collateral_status', required=False, allow_blank=True)
+    creditScore = serializers.CharField(max_length=255, source='credit_score', required=False, allow_blank=True)
+    criminalHistory = serializers.CharField(max_length=255, source='criminal_history')
+
+    class Meta:
+        model = LendingRequirements
+        fields = [
+            'collateralStatus',
+            'creditScore',
+            'criminalHistory',
+        ]

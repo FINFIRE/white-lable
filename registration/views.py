@@ -102,6 +102,8 @@ def user_logout(request):
 
 @login_required
 def registration_form_view(request):
+
+    # Retrieve the existing survey response for the logged-in user
     # Retrieve the existing survey response for the logged-in user
     try:
         response = UserDetail.objects.get(user=request.user)

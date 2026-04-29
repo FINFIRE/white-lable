@@ -48,7 +48,7 @@ class ScoreForm(forms.Form):
         ("Commercial Banking - Real Estate Loan", "Commercial Banking - Real Estate Loan"),
         ("Government Incentives Opportunity Zone Tax Credit Fund", "Government Incentives Opportunity Zone Tax Credit Fund"),
         ("Owner Debt - Retirement (401K) SDI", "Owner Debt - Retirement (401K) SDI"),
-        ("Private Equity Securities - Family & Friends", "Private Equity Securities - Family & Friends"),
+        ("Private Equity Securities - Family and Friends", "Private Equity Securities - Family and Friends"),
         ("Small Business Administration (SBA) - SBA 504B", "Small Business Administration (SBA) - SBA 504B"),
         ("Small Business Administration (SBA) - SBA 7A", "Small Business Administration (SBA) - SBA 7A"),
         ("Commercial Banking - Commercial Bank Loan", "Commercial Banking - Commercial Bank Loan"),
@@ -106,7 +106,7 @@ class ScoreForm(forms.Form):
         ("Digital Currency - Tokenization", "Digital Currency - Tokenization"),
         ("Private Equity Securities - Private Placement Memorandum", "Private Equity Securities - Private Placement Memorandum"),
         ("Private Equity Securities - Regulation A", "Private Equity Securities - Regulation A"),
-        ("Private Equity Securities - Regulation A+", "Private Equity Securities - Regulation A+"),
+        ("Private Equity Securities - Regulation A Plus", "Private Equity Securities - Regulation A Plus"),
         ("Private Equity Securities - Regulation CF Tittle III", "Private Equity Securities - Regulation CF Tittle III"),
         ("Digital Currency - Initial Coin Offering", "Digital Currency - Initial Coin Offering"),
         ("Digital Currency - Initial Exchange Offering", "Digital Currency - Initial Exchange Offering"),
@@ -122,7 +122,7 @@ class ScoreForm(forms.Form):
         ("Venture Capital - Long Term Debt", "Venture Capital - Long Term Debt"),
         ("Public Securities - Initial Public Offering (IPO)", "Public Securities - Initial Public Offering (IPO)"),
         ("Public Securities - OTC Over the Counter", "Public Securities - OTC Over the Counter"),
-        ("Venture Capital - Mergers & Acquisitions Financing", "Venture Capital - Mergers & Acquisitions Financing"),
+        ("Venture Capital - Mergers and Acquisitions Financing", "Venture Capital - Mergers and Acquisitions Financing"),
         ("Venture Capital - Equity Sale", "Venture Capital - Equity Sale"),
     ]
 

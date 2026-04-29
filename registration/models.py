@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User 
+
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # Creat your models here.
@@ -82,6 +84,4 @@ class UserDetail2(models.Model):
     Billing_Option = models.CharField(blank=True,max_length=200,choices=CHOICES3)
 
     def __str__(self):
-        return (f'{self.user} : {self.Billing_Option}')
-
-
+        return (f'{self.user} : {self.Billing_Option}')    

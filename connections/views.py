@@ -5,7 +5,7 @@ from .serializers import UserDetailSerializer, UserDetail2Serializer,EQuestionsS
 EQuestions1Serializer,EQuestions2Serializer,EQuestions3Serializer,EQuestions4Serializer,EQuestions5Serializer,\
 EQuestions6Serializer,EQuestions7Serializer, EQuestions8Serializer, EQuestions9Serializer,EQuestions10Serializer,\
 EQuestions11Serializer,EQuestions12Serializer,EQuestions13Serializer,EQuestions14Serializer,referalResponseSerializer,\
-IQuestions1Serializer,IQuestions2Serializer,VQuestion1Serializer,MatchDataSerializer,MatchDataEfficientSerializer,PurchasesSerializer,DocumentsPreparedSerializer,payLoadSerializer,preRatingSerializer
+IQuestions1Serializer,IQuestions2Serializer,VQuestion1Serializer,MatchDataSerializer,MatchDataEfficientSerializer,PurchasesSerializer,DocumentsPreparedSerializer,payLoadSerializer,preRatingSerializer,LendingRequirementsSerializer
 from rest_framework.parsers import JSONParser
 from rest_framework import views, status
 from rest_framework.response import Response
@@ -14,7 +14,7 @@ from rest_framework.authentication import TokenAuthentication  # Or use other au
 from registration.models import UserDetail,UserDetail2
 from entreprise_questions.models import EQuestions,EQuestions1,EQuestions2,EQuestions3,EQuestions4,EQuestions5,\
 EQuestions6,EQuestions7,EQuestions8,EQuestions9,EQuestions10,EQuestions11,EQuestions12,EQuestions13,PreRating,\
-EQuestions14,DocumentsPrepared,ReferalResponse
+EQuestions14,DocumentsPrepared,ReferalResponse,LendingRequirements
 from iquestions.models import IQuestions1,IQuestions2
 from CM_Market.models import VQuestion1
 from Matching_Algorithm.models import Letter_Response,Purchases
@@ -1263,23 +1263,32 @@ class preRatingAPIView(viewsets.ViewSet):
         queryset = PreRating.objects.filter(user=request.user)
         if not queryset.exists():
             raise NotFound("There is No response for this user yet,post first!!!")
-        
+
         serializer = preRatingSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    
+
     def create(self, request):
         """
-        POST method to add user details
+        POST method to add or merge user pre-rating data.
+        If a PreRating record already exists for this user, the incoming
+        preratings JSON is merged into the existing data (update).
         """
         serializer = preRatingSerializer(data=request.data)
 
         if serializer.is_valid():
             try:
-                a = PreRating.objects.get(user=self.request.user)
-                return Response({"message":"Multiple Response, Please Delete the old response of user."},status=status.HTTP_409_CONFLICT)
-            except:    
-                serializer.save(user=self.request.user)            
+                existing = PreRating.objects.get(user=self.request.user)
+                # Merge new preratings into existing JSON data
+                new_data = serializer.validated_data.get('preratings', {})
+                if isinstance(existing.preratings, dict):
+                    existing.preratings.update(new_data)
+                else:
+                    existing.preratings = new_data
+                existing.save()
+                return Response(preRatingSerializer(existing).data, status=status.HTTP_200_OK)
+            except PreRating.DoesNotExist:
+                serializer.save(user=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1817,6 +1826,42 @@ class payLoadView(viewsets.ViewSet):
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                             
 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class LendingRequirementsAPIView(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        """
+        GET method to get lending requirements
+        """
+        if request.user.groups.filter(name='Admins').exists():
+            queryset = LendingRequirements.objects.all()
+            serializer = LendingRequirementsSerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        queryset = LendingRequirements.objects.filter(user=request.user)
+        if not queryset.exists():
+            raise NotFound("There is No response for this user yet, post first!!!")
+        serializer = LendingRequirementsSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request):
+        """
+        POST method to add lending requirements
+        """
+        serializer = LendingRequirementsSerializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                LendingRequirements.objects.get(user=self.request.user)
+                return Response(
+                    {"message": "Multiple Response, Please Delete the old response of user."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            except LendingRequirements.DoesNotExist:
+                serializer.save(user=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

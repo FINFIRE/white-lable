@@ -43,7 +43,7 @@ def send_match_notification(sender, instance, created, **kwargs):
             subject,
             message,
             'romin@finfire.com',  # From email
-            ["tony@tonydrexelsmith.com","sam@finfire.com","leslye@tonydrexelsmith.com","leslye@finfire.com","nick@finfire.com","ronald@finfire.com"],  # To email
+            ["tony@tonydrexelsmith.com","sam@finfire.com","leslye@tonydrexelsmith.com","leslye@finfire.com","nick@finfire.com","ronald@finfire.com","josh@finfire.com"],  # To email
         )
         
         # Attach the Word document from the response

@@ -103,3 +103,20 @@ class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(max_length=256, required=True)
 
 
+class TenantBrandingSerializer(serializers.ModelSerializer):
+    """Public read-only branding payload for the active tenant.
+    Resolved via django_tenants from the request host, so the frontend can
+    fetch /api/branding/ with no auth and render tenant-specific theme.
+    """
+    domain = serializers.CharField(source='get_domain_name', read_only=True)
+
+    class Meta:
+        model = Client
+        fields = (
+            'schema_name', 'name', 'display_name', 'domain',
+            'logo', 'favicon', 'primary_color', 'accent_color',
+            'support_email', 'contact_phone',
+            'signature_image', 'signatory_name',
+        )
+
+
