@@ -21,9 +21,31 @@ const queryClient = new QueryClient({
   },
 });
 
-/** Redirects unauthenticated users to /login */
+/** Redirects unauthenticated users to /login.
+ * Waits for the auth store to bootstrap (checkAuth resolved) so
+ * isAdmin/user are correct before rendering the shell — otherwise an
+ * admin refreshing the page sees the regular-user view for a tick.
+ */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
+  const bootstrapped = useAuthStore((s) => s.bootstrapped);
+
+  if (!bootstrapped) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          color: '#64748B',
+          fontSize: 14,
+        }}
+      >
+        Loading…
+      </div>
+    );
+  }
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -34,9 +56,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   const loadBranding = useBrandingStore((s) => s.load);
+  const checkAuth = useAuthStore((s) => s.checkAuth);
   useEffect(() => {
     loadBranding();
-  }, [loadBranding]);
+    // Restore user/isAdmin from the persisted token on every page load.
+    // Without this, a refresh leaves user=null, isAdmin=false even though
+    // the token is still valid, and the shell renders the wrong view.
+    checkAuth();
+  }, [loadBranding, checkAuth]);
 
   return (
     <QueryClientProvider client={queryClient}>
