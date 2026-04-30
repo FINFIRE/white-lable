@@ -12,6 +12,12 @@ interface AuthState {
   token: string | null;
   user: User | null;
   isAdmin: boolean;
+  /**
+   * False until checkAuth() has resolved at least once after page load.
+   * Pages that depend on isAdmin/user must wait for this to be true,
+   * otherwise a refresh briefly renders the regular-user view for an admin.
+   */
+  bootstrapped: boolean;
 
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -22,6 +28,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: localStorage.getItem('finfire_token'),
   user: null,
   isAdmin: false,
+  bootstrapped: false,
 
   login: async (username: string, password: string) => {
     const { auth_token } = await authApi.login(username, password);
@@ -39,14 +46,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Token may already be invalid; proceed with local cleanup
     }
     localStorage.removeItem('finfire_token');
-    set({ token: null, user: null, isAdmin: false });
+    set({ token: null, user: null, isAdmin: false, bootstrapped: true });
     useQuestionnaireStore.getState().setAccountType(null);
   },
 
   checkAuth: async () => {
     const token = get().token;
     if (!token) {
-      set({ user: null, isAdmin: false });
+      set({ user: null, isAdmin: false, bootstrapped: true });
       return;
     }
     try {
@@ -54,6 +61,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({
         user: { username: user.username, email: user.email },
         isAdmin: user.is_staff ?? false,
+        bootstrapped: true,
       });
 
       // Try to restore account type from backend
@@ -74,7 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch {
       localStorage.removeItem('finfire_token');
-      set({ token: null, user: null, isAdmin: false });
+      set({ token: null, user: null, isAdmin: false, bootstrapped: true });
     }
   },
 }));

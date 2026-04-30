@@ -59,7 +59,7 @@ class ClientSerializer(serializers.ModelSerializer):
         # creating user in that domain so that user can login as super user
         with schema_context(client.schema_name):
             user = User.objects.create_superuser(
-                email=email, password=password,
+                username=email, email=email, password=password,
             )
             user.save()
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuestionnaireStore } from '../../stores/questionnaireStore';
 import { useAuthStore } from '../../stores/authStore';
+import BrandLogo from './BrandLogo';
 
 interface NavItem {
   id: string;
@@ -73,11 +74,7 @@ const Sidebar: React.FC = () => {
     >
       {/* Logo */}
       <div style={{ padding: '22px 18px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <img
-          src="/logo.png"
-          alt="FINFIRE"
-          style={{ height: 34, width: 'auto', flexShrink: 0 }}
-        />
+        <BrandLogo style={{ height: 34, width: 'auto', flexShrink: 0 }} />
         <div>
           <div style={{ fontSize: 11, color: '#64748B', lineHeight: '14px' }}>
             {isAdmin ? 'Admin Panel' : 'Tenant Portal'}

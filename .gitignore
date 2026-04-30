@@ -167,6 +167,9 @@ media/
 admin/
 rest_framework/
 
+# Local session/dev notes (often contain credentials)
+state.md
+
 # for mac
 .DS_Store
 .env.compose
