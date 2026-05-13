@@ -75,6 +75,11 @@ TENANT_APPS = (
     'Matching_Algorithm.apps.MatchingAlgorithmConfig',
     'truth_in_capital.apps.TruthInCapitalConfig',
 
+    # authtoken belongs to each tenant schema so DRF tokens FK to that
+    # tenant's auth_user. Listed in SHARED_APPS too (mirroring auth /
+    # token_blacklist) so the public schema also has its own table for
+    # platform-admin flows.
+    'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
 
     'djoser',
@@ -178,6 +183,8 @@ DJOSER = {
     'SERIALIZERS': {
         'user': 'finfire_whitelable.djoser_overrides.CustomUserSerializer',
         'current_user': 'finfire_whitelable.djoser_overrides.CustomUserSerializer',
+        'user_create': 'finfire_whitelable.djoser_overrides.CustomUserCreateSerializer',
+        'user_create_password_retype': 'finfire_whitelable.djoser_overrides.CustomUserCreatePasswordRetypeSerializer',
     },
 }
 

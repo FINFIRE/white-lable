@@ -5,16 +5,21 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from django_filters.rest_framework.backends import DjangoFilterBackend
-
+from django_tenants.utils import schema_context, get_public_schema_name
 
 from django.db import connection
+from django.contrib.auth import get_user_model
 
 from .models import Client
 from .serializers import (
     ClientSerializer,
     LoginSerializers, LogoutSerializer,
     TenantBrandingSerializer,
+    TenantSuperuserCreateSerializer,
 )
+
+
+User = get_user_model()
 
 
 class ListCreateClientAPIView(generics.ListCreateAPIView):
@@ -61,6 +66,72 @@ class LogoutApiView(generics.GenericAPIView):
             return response.Response({"success": "Successfully Logout"}, status=status.HTTP_200_OK)
         except TokenError:
             return response.Response({"error": "Token is Invalid or Expire."}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class TenantSuperuserCreateView(generics.GenericAPIView):
+    """POST /tenants/<pk>/create-superuser/ — mint a superuser inside the
+    target tenant's schema. Public-schema-only: callable only by an
+    authenticated platform admin (e.g. romin), and only when the request
+    hits the public URL conf (i.e. on the bare host, not a tenant subdomain).
+    """
+    http_method_names = ['post']
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    serializer_class = TenantSuperuserCreateSerializer
+    queryset = Client.objects.all()
+
+    def _is_public_request(self):
+        tenant = getattr(connection, 'tenant', None)
+        if tenant is None:
+            return True
+        return getattr(tenant, 'schema_name', 'public') == get_public_schema_name()
+
+    def post(self, request, pk, *args, **kwargs):
+        if not self._is_public_request():
+            return response.Response(
+                {'detail': 'Endpoint is only available on the public schema host.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            client = Client.objects.get(pk=pk)
+        except Client.DoesNotExist:
+            return response.Response(
+                {'detail': 'Tenant not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if client.schema_name == get_public_schema_name():
+            return response.Response(
+                {'detail': 'Cannot mint a tenant superuser inside the public schema.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        username = serializer.validated_data['username']
+        email = serializer.validated_data.get('email') or ''
+        password = serializer.validated_data['password']
+
+        with schema_context(client.schema_name):
+            if User.objects.filter(username=username).exists():
+                return response.Response(
+                    {'username': ['A user with that username already exists in this tenant.']},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user = User.objects.create_superuser(
+                username=username, email=email, password=password,
+            )
+            return response.Response(
+                {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'tenant_schema': client.schema_name,
+                    'tenant_id': client.id,
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
 
 class TenantBrandingView(generics.GenericAPIView):

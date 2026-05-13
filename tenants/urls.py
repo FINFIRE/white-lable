@@ -7,13 +7,14 @@ from .views import (
     LoginApiView,
     LogoutApiView,
 
-
+    TenantSuperuserCreateView,
 )
 
 urlpatterns = [
 
     path('', ListCreateClientAPIView.as_view()),
     path('<int:pk>/', RUDClientAPIView.as_view()),
+    path('<int:pk>/create-superuser/', TenantSuperuserCreateView.as_view(), name='tenant-create-superuser'),
 
 
     path('login/', LoginApiView.as_view()),
