@@ -103,6 +103,16 @@ class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(max_length=256, required=True)
 
 
+class TenantSuperuserCreateSerializer(serializers.Serializer):
+    """Body for POST /tenants/<pk>/create-superuser/.
+    Used by a public-schema admin (e.g. the platform owner) to mint a
+    superuser inside an existing tenant's schema without shell access.
+    """
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=254, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, required=True, min_length=6)
+
+
 class TenantBrandingSerializer(serializers.ModelSerializer):
     """Public read-only branding payload for the active tenant.
     Resolved via django_tenants from the request host, so the frontend can

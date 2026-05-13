@@ -8,7 +8,7 @@
 {% blocktrans %}You're receiving this email because you need to finish activation process for FINFIRE Matching app.{% endblocktrans %}
 
 {% trans "Please go to the following page to activate account:" %}
-http://app.finfireapplication.com/{{ url|safe }}
+{{ protocol }}://{{ domain }}/{{ url|safe }}
 
 {% trans "Thanks for using our site!" %}
 
@@ -19,7 +19,7 @@ http://app.finfireapplication.com/{{ url|safe }}
 <p>{% blocktrans %}You're receiving this email because you need to finish activation process for FINFIRE.{% endblocktrans %}</p>
 
 <p>{% trans "Please go to the following page to activate account:" %}</p>
-<p><a href="http://app.finfireapplication.com/{{ url|safe }}">http://app.finfireapplication.com/{{ url|safe }}</a></p>
+<p><a href="{{ protocol }}://{{ domain }}/{{ url|safe }}">{{ protocol }}://{{ domain }}/{{ url|safe }}</a></p>
 
 <p>{% trans "Thanks for using our site!" %}</p>
 

@@ -166,6 +166,10 @@ static/
 media/
 admin/
 rest_framework/
+# the bare `admin/` rule above is meant for collected static, not for our
+# tracked Django admin templates / sources
+!templates/admin/
+!tenants/admin.py
 
 # Local session/dev notes (often contain credentials)
 state.md
