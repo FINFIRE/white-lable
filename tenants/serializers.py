@@ -126,7 +126,8 @@ class TenantBrandingSerializer(serializers.ModelSerializer):
             'schema_name', 'name', 'display_name', 'domain',
             'logo', 'favicon', 'primary_color', 'accent_color',
             'support_email', 'contact_phone',
-            'signature_image', 'signatory_name',
+            'signature_image', 'signatory_name', 'signatory_title',
+            'address',
         )
 
 

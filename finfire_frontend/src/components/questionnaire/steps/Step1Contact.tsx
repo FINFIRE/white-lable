@@ -158,32 +158,52 @@ const Step1Contact: React.FC<Step1ContactProps> = ({ onComplete }) => {
         />
       </div>
 
-      {/* Business Phone */}
+      {/* Business Phone — digits and basic formatting only */}
       <div className="space-y-1">
         <label htmlFor="businessPhone" className="block text-sm font-medium text-slate-900">
           Business Phone
         </label>
         <input
           id="businessPhone"
-          type="text"
-          {...register('businessPhone')}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
+          {...register('businessPhone', {
+            pattern: {
+              value: /^[0-9+\-()\s.]*$/,
+              message: 'Phone must contain digits only (with optional +, -, (), spaces)',
+            },
+          })}
           className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           placeholder="(555) 123-4567"
         />
+        {errors.businessPhone && (
+          <p className="text-xs text-red-500">{errors.businessPhone.message}</p>
+        )}
       </div>
 
-      {/* Mobile Phone */}
+      {/* Mobile Phone — digits and basic formatting only */}
       <div className="space-y-1">
         <label htmlFor="mobilePhone" className="block text-sm font-medium text-slate-900">
           Mobile Phone
         </label>
         <input
           id="mobilePhone"
-          type="text"
-          {...register('mobilePhone')}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          {...register('mobilePhone', {
+            pattern: {
+              value: /^[0-9+\-()\s.]*$/,
+              message: 'Phone must contain digits only (with optional +, -, (), spaces)',
+            },
+          })}
           className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           placeholder="(555) 987-6543"
         />
+        {errors.mobilePhone && (
+          <p className="text-xs text-red-500">{errors.mobilePhone.message}</p>
+        )}
       </div>
 
       {/* Company Affiliation */}

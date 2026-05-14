@@ -65,7 +65,8 @@ const Topbar: React.FC = () => {
                 width: `${progress}%`,
                 height: '100%',
                 borderRadius: 4,
-                background: 'linear-gradient(90deg, #3B82F6, #2563EB)',
+                background:
+                  'linear-gradient(90deg, var(--brand-primary), var(--brand-accent))',
                 transition: 'width 0.3s ease',
               }}
             />
@@ -81,7 +82,7 @@ const Topbar: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            background: '#2563EB',
+            background: 'var(--brand-primary)',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: 10,
@@ -90,10 +91,10 @@ const Topbar: React.FC = () => {
             fontWeight: 600,
             cursor: 'pointer',
             fontFamily: 'inherit',
-            transition: 'background 0.15s',
+            transition: 'filter 0.15s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#1D4ED8')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#2563EB')}
+          onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(0.9)')}
+          onMouseLeave={(e) => (e.currentTarget.style.filter = '')}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M12 5v14M5 12h14" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" />
@@ -107,7 +108,7 @@ const Topbar: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            background: '#2563EB',
+            background: 'var(--brand-primary)',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: 10,
@@ -116,10 +117,10 @@ const Topbar: React.FC = () => {
             fontWeight: 600,
             cursor: 'pointer',
             fontFamily: 'inherit',
-            transition: 'background 0.15s',
+            transition: 'filter 0.15s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#1D4ED8')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#2563EB')}
+          onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(0.9)')}
+          onMouseLeave={(e) => (e.currentTarget.style.filter = '')}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M12 5v14M5 12h14" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" />
