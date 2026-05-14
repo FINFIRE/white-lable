@@ -1,0 +1,185 @@
+import React from 'react';
+import Avatar from '../ui/Avatar';
+import CapitalBadge from '../ui/CapitalBadge';
+
+const AVATAR_PALETTE = ['#2563EB', '#7C3AED', '#0891B2', '#059669', '#D97706'];
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+interface DocumentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: any;
+}
+
+const DetailRow: React.FC<{ label: string; children: React.ReactNode }> = ({
+  label,
+  children,
+}) => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '10px 0',
+      borderBottom: '1px solid #F1F5F9',
+      fontSize: 13,
+    }}
+  >
+    <span style={{ color: '#64748B', fontWeight: 500 }}>{label}</span>
+    <span style={{ color: '#0F172A', fontWeight: 600 }}>{children}</span>
+  </div>
+);
+
+const DocumentModal: React.FC<DocumentModalProps> = ({ isOpen, onClose, user }) => {
+  if (!isOpen || !user) return null;
+
+  const initials = getInitials(user.display_name || '');
+  const avatarColor = AVATAR_PALETTE[(user.id ?? 0) % AVATAR_PALETTE.length];
+  const company =
+    user.companyAffiliation?.[0] || user.company || '';
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(15,23,42,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 20,
+          padding: 32,
+          width: 460,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          position: 'relative',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ fontSize: 17, fontWeight: 700, color: '#0F172A' }}>
+            Capital match document
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              style={{
+                background: '#2563EB',
+                color: '#fff',
+                borderRadius: 8,
+                padding: '6px 14px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+              onClick={() => window.print()}
+            >
+              Print
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 8,
+                background: '#F1F5F9',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 15,
+                color: '#64748B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              &#10005;
+            </button>
+          </div>
+        </div>
+
+        {/* Blue accent bar */}
+        <div
+          style={{
+            height: 4,
+            background: 'linear-gradient(90deg, #3B82F6, #1D4ED8)',
+            borderRadius: 2,
+            marginBottom: 22,
+          }}
+        />
+
+        {/* User info */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            marginBottom: 22,
+          }}
+        >
+          <Avatar initials={initials} color={avatarColor} size={48} />
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+              {user.display_name}
+            </div>
+            <div style={{ fontSize: 13, color: '#64748B', marginTop: 1 }}>
+              {company}
+            </div>
+          </div>
+        </div>
+
+        {/* Detail rows */}
+        <div style={{ marginBottom: 22 }}>
+          <DetailRow label="Email">{user.email}</DetailRow>
+          <DetailRow label="Capital type">
+            <CapitalBadge capital={user.capitalType || 'Pending'} />
+          </DetailRow>
+          <DetailRow label="Status">{user.status || 'Pending'}</DetailRow>
+          <DetailRow label="Date matched">{user.date || '---'}</DetailRow>
+        </div>
+
+        {/* Info note */}
+        <div
+          style={{
+            background: '#F8FAFC',
+            borderRadius: 10,
+            padding: 14,
+            fontSize: 12,
+            color: '#64748B',
+            lineHeight: 1.6,
+            borderLeft: '3px solid #3B82F6',
+          }}
+        >
+          This document was generated by the FINFIRE platform based on the user's
+          submitted profile and capital programs configured by the tenant
+          administrator.
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DocumentModal;
