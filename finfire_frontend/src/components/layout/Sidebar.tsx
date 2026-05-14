@@ -112,7 +112,7 @@ const Sidebar: React.FC = () => {
                 transition: 'background 0.15s, color 0.15s',
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? '#3B82F6' : '#64748B'}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'var(--brand-primary)' : '#64748B'}>
                 <path d={item.icon} />
               </svg>
               <span>{item.label}</span>
@@ -124,7 +124,7 @@ const Sidebar: React.FC = () => {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    background: '#3B82F6',
+                    background: 'var(--brand-primary)',
                   }}
                 />
               )}
@@ -141,7 +141,9 @@ const Sidebar: React.FC = () => {
               width: 32,
               height: 32,
               borderRadius: '50%',
-              background: isAdmin ? '#7C3AED' : '#1E40AF',
+              // Admin keeps a dedicated purple (role indicator, not brand);
+              // regular users get the tenant's primary color.
+              background: isAdmin ? '#7C3AED' : 'var(--brand-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

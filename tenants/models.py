@@ -19,6 +19,14 @@ class Client(TenantMixin):
     contact_phone = models.CharField(max_length=40, blank=True, default='')
     signature_image = models.ImageField(upload_to='tenant_branding/', blank=True, null=True)
     signatory_name = models.CharField(max_length=120, blank=True, default='')
+    signatory_title = models.CharField(
+        max_length=120, blank=True, default='',
+        help_text='Job title shown under the signatory name on generated letters (e.g. "Chief Revenue Officer").',
+    )
+    address = models.TextField(
+        blank=True, default='',
+        help_text='Multi-line postal address used in the letter footer.',
+    )
 
     # default true, schema will be automatically created and synced when it is saved
     auto_create_schema = True

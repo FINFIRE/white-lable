@@ -137,12 +137,15 @@ export const TIMING_OPTIONS = [
   'More than 1 year',
 ] as const;
 
+// Must stay in sync with ReferalResponse.referral_source choices
+// in entreprise_questions/models.py.
 export const REFERRAL_OPTIONS = [
-  'Google Search',
+  'A Friend / Colleague',
+  'Financial Advisor / Consultant',
   'Social Media',
-  'Word of Mouth',
-  'Event/Conference',
-  'Email',
+  'Online Search',
+  'News / Article / Blog',
+  'Event / Webinar',
   'Other',
 ] as const;
 

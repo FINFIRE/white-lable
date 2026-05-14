@@ -2,219 +2,262 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-{% block header %}    
+{% block header %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'img/b.png' %}" type="image/x-icon">
-    <title>FINFIRE Report</title>
+    <link rel="icon" href="{% if branding.logo_url %}{{ branding.logo_url }}{% else %}{% static 'img/b.png' %}{% endif %}" type="image/x-icon">
+    <title>{{ branding.brand_name|default:"FINFIRE" }} Report</title>
     <style>
+        /* ── Tenant-aware brand palette ──────────────────────────────
+           Defaults to dark-slate / blue if a tenant hasn't set colors,
+           but tenants that did set them will see their colors here. */
+        :root {
+            --brand-primary: {{ branding.primary_color|default:"#0F172A" }};
+            --brand-accent: {{ branding.accent_color|default:"#3B82F6" }};
+            --brand-muted: #64748B;
+            --brand-rule: #E2E8F0;
+            --brand-body: #1F2937;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+            font-family: 'Times New Roman', Times, serif;
             margin: 0;
             padding: 0;
+            color: var(--brand-body);
+            line-height: 1.3;
         }
         .container {
-            max-width: 800px;
+            max-width: 760px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2px 24px 8px;
         }
-        .logo {
-            display: inline-block; /* Display as inline to avoid block-level spacing */
-            margin: 0;
-            padding: 0;
-            line-height: 0; /* Reduces extra vertical space */
+        .page-break { page-break-after: always; }
+
+        /* ── Letter head ──────────────────────────────────────────── */
+        .brand-bar {
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            margin: 0 -24px 8px;
+            border-radius: 2px;
         }
-        .logo img {
-            display: inline; /* Ensure image is treated as inline content */
-            vertical-align: middle; /* Align the image vertically in line with text */
-            height: 50px; /* Adjust the height to fit the design, modify as needed */
-            width: auto; /* Maintain the aspect ratio */
-        }
-        .spacing {
-            margin-top: 20px;
-        }
-        .content {
-            text-align: left;
-            margin-top: 20px;
-            line-height: 1.5;
-            font-size: 11pt;   
-            font-family: 'Times New Roman', Times, serif;
-        }
-        .capital-source, .pricing {
+        .letter-head {
             display: flex;
             justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--brand-rule);
+            margin-bottom: 8px;
         }
-        .pricing-summary {
-            margin-top: 20px;
-            text-align: right;
+        .letter-head .logo img { display: block; }
+        .letter-head .meta { text-align: right; font-family: 'Helvetica', Arial, sans-serif; }
+        .letter-head .brand-name {
+            font-size: 11pt; font-weight: 700;
+            color: var(--brand-primary);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
+        .letter-head .date {
+            font-size: 9pt;
+            color: var(--brand-muted);
+            margin-top: 1px;
+        }
+
+        /* ── Recipient block ──────────────────────────────────────── */
+        .recipient {
+            border-left: 3px solid var(--brand-accent);
+            padding: 1px 10px;
+            margin-bottom: 8px;
+            font-size: 10pt;
+            line-height: 1.3;
+        }
+        .recipient .name { font-weight: 700; color: var(--brand-primary); }
+
+        /* ── Body ─────────────────────────────────────────────────── */
+        .greeting {
+            font-size: 11pt; font-weight: 700;
+            color: var(--brand-primary);
+            margin: 0 0 4px;
+        }
+        .body p {
+            font-size: 10pt;
+            margin: 0 0 4px;
+            text-align: justify;
+        }
+        .capital-name { color: var(--brand-primary); font-weight: 700; }
+        .body a { color: var(--brand-accent); text-decoration: none; font-weight: 600; }
+
+        /* ── Numbered steps with primary-colored badges ───────────── */
+        .step {
+            position: relative;
+            padding: 0 0 4px 24px;
+            font-size: 10pt;
+            text-align: justify;
+        }
+        .step-num {
+            position: absolute;
+            left: 0; top: 1px;
+            width: 16px; height: 16px; line-height: 16px;
+            text-align: center;
+            background: var(--brand-primary); color: #FFFFFF;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 8.5pt;
+            font-family: 'Helvetica', Arial, sans-serif;
+        }
+
+        /* ── Signature ────────────────────────────────────────────── */
         .signature {
-            margin-top: 40px;
-            text-align: left;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid var(--brand-rule);
         }
-        .button {
-            margin-top: 20px;
-            text-align: right;    
+        .signature .submitted {
+            color: var(--brand-muted);
+            font-style: italic;
+            margin: 0 0 2px;
+            font-size: 9.5pt;
         }
-        .page {
-            margin: 0 auto; 
-            padding: 20px; 
-            max-width: 80%; border: 1px solid #ccc; 
-            border-radius: 10px; 
-            background-color: #f9f9f9;
+        .signature .signature-image { margin: 1px 0; }
+        .signature .signatory-name {
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin: 2px 0 0;
+            font-size: 10.5pt;
+        }
+        .signature .signatory-title {
+            color: var(--brand-muted);
+            font-size: 9pt;
+            margin: 0;
         }
 
-        .page-break {
-            page-break-after: always;
+        /* ── Page 2: Legal disclosure ─────────────────────────────── */
+        .legal h2 {
+            color: var(--brand-primary);
+            font-size: 14pt;
+            text-align: center;
+            margin: 0 0 6px;
+            letter-spacing: 0.06em;
         }
-
-    </style>        
-<script>
-    function calculateTotal() {
-        // Retrieve input values and ensure they are non-negative
-        var option1 = Math.max(0, parseInt(document.getElementById("id_option1").value) || 0);
-        var option2 = Math.max(0, parseInt(document.getElementById("id_option2").value) || 0);
-        var option3 = Math.max(0, parseInt(document.getElementById("id_option3").value) || 0);
-        var option4 = Math.max(0, parseInt(document.getElementById("id_option4").value) || 0);
-        var option5 = Math.max(0, parseInt(document.getElementById("id_option5").value) || 0);
-        var option6 = Math.max(0, parseInt(document.getElementById("id_option6").value) || 0);
-        var option7 = Math.max(0, parseInt(document.getElementById("id_option7").value) || 0);
-
-        // Ensure the input fields reflect the updated values (non-negative)
-        document.getElementById("id_option1").value = option1;
-        document.getElementById("id_option2").value = option2;
-        document.getElementById("id_option3").value = option3;
-        document.getElementById("id_option4").value = option4;
-        document.getElementById("id_option5").value = option5;
-        document.getElementById("id_option6").value = option6;
-        document.getElementById("id_option7").value = option7;
-
-        // Define the price per item (replace with actual price)
-        var price = parseFloat("{{ price }}") || 10.00; // Use a default value or actual price
-
-        // Calculate total number (totalnum)
-        var totalNum = option1 + option2 + option3 + option4 + option5 + option6 + option7;
-        document.getElementById("totalnum").innerText = totalNum;
-
-        // Calculate total price
-        var totalPrice = totalNum * price;
-        document.getElementById("totalprice").innerText = totalPrice.toFixed(2);
-
-        // Calculate discount based on totalNum
-        var discount = 0;
-        if (totalNum > 200) {
-            discount = 0.4 * totalPrice;
-        } else if (totalNum > 100) {
-            discount = 0.2 * totalPrice;
+        .legal h2::after {
+            content: '';
+            display: block;
+            width: 64px;
+            height: 3px;
+            background: var(--brand-accent);
+            margin: 8px auto 18px;
         }
-        document.getElementById("discount").innerText = discount.toFixed(2);
-
-        // Calculate balance due
-        var balanceDue = totalPrice - discount;
-        document.getElementById("balancedue").innerText = balanceDue.toFixed(2);
-    }
-</script>
+        .legal p {
+            font-size: 10pt;
+            text-align: justify;
+            margin: 0 0 11px;
+        }
+        .legal .meta {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 9pt;
+            color: var(--brand-muted);
+        }
+    </style>
 </head>
 {% endblock header %}
 {% block main %}
 <body>
-    {% block headhead %}{% endblock headhead %}
-    <div class="container page-break">
-        <!-- Company Logo -->
+{% block headhead %}{% endblock headhead %}
+
+<!-- ─── Page 1: cover letter ─────────────────────────────────── -->
+<div class="container page-break">
+    <div class="brand-bar"></div>
+
+    <div class="letter-head">
         <div class="logo">
-            <img src="{% static 'img/b.png' %}" alt="Image" style="width: 3.05in; height: 0.82in;">
+            <img src="{% if branding.logo_url %}{{ branding.logo_url }}{% else %}{% static 'img/b.png' %}{% endif %}"
+                 alt="{{ branding.brand_name|default:'FINFIRE' }}"
+                 style="height: 0.45in; width: auto; max-width: 2in;">
         </div>
-        <div class="content">
-
-  	<p>{{ date }}</p>
-	<p>{{ firstname }} {{ lastname }}
-        <br>{{ businessname }}
-            <br>{{ address }}
-        <br>
-            {% if phone and phone != "NA" %}
-            {{ phone }}
-            {% else %}
-                {{ secondphone }}
-            {% endif %}
-        <br>{{ email }}
-        </p>
-        </div>
-
-        <!-- Main Content -->
-        <div class="content">
-        <!-- Personalized Greeting -->
-        <p>Dear {{ firstname }} {{ lastname }},</p>            
-             <p>
-                Thank you for engaging us to complete your FINFIRE registration. Our goal is to provide your enterprise with the most probable capital type match.  Based on your answers to our questions, our App recommends that your enterprise develop a 2-tranche capitalization strategy. Stage 1 is {{ cm1name }}. Stage 2 is {{ cm2name }}. We believe that FINFIRE can assist in developing the approach as follows:
-            </p>
-            <p>
-                1. FINFIRE Report™ - An AI driven (And human produced) capital type explanation of {{ cm1name }}.  It defines the capital type, costs, timelines, qualifications, and documentation requirements. We refer to this as the “FINFIRE AI Report.” We charge a one-time fee of $499 to complete it. After you approve and pay for it, we can have it completed within 1-3 business days.
-            </p>
-            <p>
-                2. We will issue a checklist to determine documents you have already completed, and those needed to complete the Form for {{ cm1name }}.  This includes but is not limited to:  A 5-year pro forma, business model canvas, valuation, video production, Form for {{ cm1name }}, and a data room.
-            </p>
-            <p>
-                3. Additionally, FINFIRE suggests that the FINFIRE database of potential investor leads may be built, a marketing plan developed, and a monthly management program to introduce investors to both the {{ cm1name }} and {{ cm2name }}. FINFIRE will serve as the coordinator and advisor between the capital markets.  We will oversee investor relations, meeting management, document management, and follow through.
-            <p>
-                To summarize, you have options moving forward. You may choose to do nothing (We agreed to process your registration and provide you with a recommended capital type at no charge, which this letter has already provided). We assume you prefer to move forward with an agreement for services. We have prepared such an agreement and will send it to you today.   
-            </p>
-            <p>
-            Please let us know which option you are choosing.  Email Sam@FINFIRE.com.  We look forward to serving you.
-            </p>
-            <!-- Signature -->
-            <div class="signature">
-                <p>Respectfully Submitted,</p>
-                <br>
-                <p>Nick Cope
-                <br>Chief Revenue Officer</p>
-            </div>           
-        </div>
-    </div>  
-
-    <!-- Legal Disclaimer Section -->
-    <div class="container">
-        <div class="content" style="font-family: 'Times New Roman', Times, serif; line-height: 1.6; font-size: 11pt;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="font-size: 14pt; font-weight: bold; text-decoration: underline;">LEGAL DISCLOSURE</h2>
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <p style="text-align: justify; margin-bottom: 10px;">
-                    The information and materials contained herein are provided as a general source of information. While every measure has been taken to ensure the accuracy of the material, FINFIRE, Inc. and affiliates do not guarantee the accuracy or completeness of the material found in the FINFIRE App or Capital Markets & Types™.
-                </p>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <p style="text-align: justify; margin-bottom: 10px;">
-                    FINFIRE, Inc., its PWA App and the corresponding Capital Markets & Types™ are not intended to provide investment, financial, legal, accounting or tax advice. The components covered in these platforms, services and documenta frequently change based on many factors (i.e., economic changes, legal and government regulation). FINFIRE, Inc., and its affiliates will not be responsible in any manner for direct, indirect, or special damages, howsoever caused, arising out of the use of these apps, technologies, or supporting materials.
-                </p>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <p style="text-align: justify; margin-bottom: 10px;">
-                    The information herein is not an offer to sell or a solicitation to buy any security, which can only be made by an offering memorandum, information statement or prospectus, nor does it constitute an offer by FINFIRE, Inc.
-                </p>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <p style="text-align: justify; margin-bottom: 10px;">
-                    You should not rely on any past performance as a guarantee of future fund-raising performance as it relates herein. Specifically, regarding Capital Markets & Types™, and past client fundraising performance does not guarantee that future projects will be successful in raising capital, regardless of the client's Certification.
-                </p>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <p style="text-align: justify; margin-bottom: 10px;">
-                    At all times FINFIRE, Inc. and Capital Markets & Types™ makes every effort to present accurate and reliable information regarding its services, which are based on the information provided by its clients for review and analysis by its team of experts. Any and all legal or accounting summaries presented should be checked by qualified legal and accounting counsel.
-                </p>
-            </div>
-
-            <div style="margin-top: 30px; text-align: center; font-size: 10pt;">
-                <p>Document Version: 1.0 | Last Updated: {{ date }}</p>
-            </div>
+        <div class="meta">
+            <div class="brand-name">{{ branding.brand_name|default:"FINFIRE" }}</div>
+            <div class="date">{{ date }}</div>
         </div>
     </div>
+
+    <div class="recipient">
+        <div class="name">{{ firstname }} {{ lastname }}</div>
+        {{ businessname }}<br>
+        {{ address }}<br>
+        {% if phone and phone != "NA" %}{{ phone }}{% else %}{{ secondphone }}{% endif %}<br>
+        {{ email }}
+    </div>
+
+    <div class="body">
+        <p class="greeting">Dear {{ firstname }} {{ lastname }},</p>
+
+        <p>
+            Thank you for engaging us to complete your FINFIRE registration. Our goal is to provide your enterprise with the most probable capital type match. Based on your answers to our questions, our App recommends that your enterprise develop a 2-tranche capitalization strategy. Stage 1 is <span class="capital-name">{{ cm1name }}</span>. Stage 2 is <span class="capital-name">{{ cm2name }}</span>. We believe that FINFIRE can assist in developing the approach as follows:
+        </p>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <strong>FINFIRE Report™</strong> &mdash; an AI-driven (and human-produced) capital type explanation of <span class="capital-name">{{ cm1name }}</span>. It defines the capital type, costs, timelines, qualifications, and documentation requirements. We refer to this as the "FINFIRE AI Report." We charge a one-time fee of $499 to complete it. After you approve and pay for it, we can have it completed within 1-3 business days.
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            We will issue a checklist to determine documents you have already completed, and those needed to complete the Form for <span class="capital-name">{{ cm1name }}</span>. This includes but is not limited to: a 5-year pro forma, business model canvas, valuation, video production, Form for {{ cm1name }}, and a data room.
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            FINFIRE suggests that the FINFIRE database of potential investor leads may be built, a marketing plan developed, and a monthly management program to introduce investors to both <span class="capital-name">{{ cm1name }}</span> and <span class="capital-name">{{ cm2name }}</span>. FINFIRE will serve as the coordinator and advisor between the capital markets, overseeing investor relations, meeting management, document management, and follow-through.
+        </div>
+
+        <p>
+            To summarize, you have options moving forward. You may choose to do nothing (we agreed to process your registration and provide you with a recommended capital type at no charge, which this letter has already provided). We assume you prefer to move forward with an agreement for services. We have prepared such an agreement and will send it to you today.
+        </p>
+        <p>
+            Please let us know which option you are choosing. Email
+            <a href="mailto:{{ branding.support_email|default:'Sam@FINFIRE.com' }}">{{ branding.support_email|default:"Sam@FINFIRE.com" }}</a>.
+            We look forward to serving you.
+        </p>
+
+        <div class="signature">
+            <p class="submitted">Respectfully Submitted,</p>
+            {% if branding.signature_url %}
+            <div class="signature-image">
+                <img src="{{ branding.signature_url }}" alt="Signature" style="max-height: 0.6in; width: auto;">
+            </div>
+            {% endif %}
+            <p class="signatory-name">{{ branding.signatory_name|default:"Nick Cope" }}</p>
+            <p class="signatory-title">{{ branding.signatory_title|default:"Chief Revenue Officer" }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Page 2: legal disclosure ─────────────────────────────── -->
+<div class="container">
+    <div class="legal">
+        <h2>LEGAL DISCLOSURE</h2>
+
+        <p>
+            The information and materials contained herein are provided as a general source of information. While every measure has been taken to ensure the accuracy of the material, FINFIRE, Inc. and affiliates do not guarantee the accuracy or completeness of the material found in the FINFIRE App or Capital Markets &amp; Types&trade;.
+        </p>
+        <p>
+            FINFIRE, Inc., its PWA App and the corresponding Capital Markets &amp; Types&trade; are not intended to provide investment, financial, legal, accounting or tax advice. The components covered in these platforms, services and documents frequently change based on many factors (i.e., economic changes, legal and government regulation). FINFIRE, Inc., and its affiliates will not be responsible in any manner for direct, indirect, or special damages, howsoever caused, arising out of the use of these apps, technologies, or supporting materials.
+        </p>
+        <p>
+            The information herein is not an offer to sell or a solicitation to buy any security, which can only be made by an offering memorandum, information statement or prospectus, nor does it constitute an offer by FINFIRE, Inc.
+        </p>
+        <p>
+            You should not rely on any past performance as a guarantee of future fund-raising performance as it relates herein. Specifically, regarding Capital Markets &amp; Types&trade;, past client fundraising performance does not guarantee that future projects will be successful in raising capital, regardless of the client's Certification.
+        </p>
+        <p>
+            At all times FINFIRE, Inc. and Capital Markets &amp; Types&trade; makes every effort to present accurate and reliable information regarding its services, which are based on the information provided by its clients for review and analysis by its team of experts. Any and all legal or accounting summaries presented should be checked by qualified legal and accounting counsel.
+        </p>
+
+        <div class="meta">Document Version: 1.0 &nbsp;|&nbsp; Last Updated: {{ date }}</div>
+    </div>
+</div>
+
 </body>
 {% endblock main %}
 {% block footer %}{% endblock footer %}

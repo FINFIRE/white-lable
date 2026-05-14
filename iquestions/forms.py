@@ -30,7 +30,7 @@ class IQuestions1Form(forms.Form):
         ('Agriculture','Agriculture'),
         ('Arts','Arts'),
         ('Energy/Utilities','Energy/Utilities'),
-        ('Entertainmen','Entertainment'),
+        ('Entertainment','Entertainment'),
         ('Finance','Finance'),
         ('High tech','High tech'),
         ('Hospitality, F & B','Hospitality, F & B'),

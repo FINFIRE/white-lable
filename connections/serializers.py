@@ -15,6 +15,17 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 
 
+def _model_field_choices(model, field_name):
+    """Return the list of valid string values for a model field's choices.
+    Used to construct DRF ChoiceField on serializer fields that source from
+    a column with model-level `choices=…`. Without this, plain CharField
+    silently accepts strings that aren't in the choice list, which lets
+    out-of-range values reach the DB (and then the React form can't
+    pre-select the matching radio on reload).
+    """
+    return [c[0] for c in model._meta.get_field(field_name).choices]
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -47,7 +58,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 # For Account in Front end
 class UserDetail2Serializer(serializers.ModelSerializer):
-    accountType = serializers.CharField(max_length=200, source='Account_Type')
+    accountType = serializers.ChoiceField(
+        choices=_model_field_choices(UserDetail2, 'Account_Type'),
+        source='Account_Type',
+    )
     primaryAppUse = serializers.ListField(
         child=serializers.CharField(max_length=200), source='Primary_Purpose'
     )
@@ -57,8 +71,15 @@ class UserDetail2Serializer(serializers.ModelSerializer):
         fields = ['accountType', 'primaryAppUse']
 
 class EQuestionsSerializer(serializers.ModelSerializer):
-    rangeofCost = serializers.CharField(max_length=200,source='Selected_Option')
-    timing = serializers.CharField(max_length=200,source='Selected_Option2')
+    rangeofCost = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions, 'Selected_Option'),
+        source='Selected_Option',
+    )
+    timing = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions, 'Selected_Option2'),
+        source='Selected_Option2',
+    )
+
     class Meta:
         model = EQuestions
         fields = [
@@ -68,7 +89,10 @@ class EQuestionsSerializer(serializers.ModelSerializer):
 
 #For Stage in front end
 class EQuestions1Serializer(serializers.ModelSerializer):
-    stageofCompany = serializers.CharField(source='Selected_Option')
+    stageofCompany = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions1, 'Selected_Option'),
+        source='Selected_Option',
+    )
 
     class Meta:
         model = EQuestions1
@@ -78,9 +102,16 @@ class EQuestions1Serializer(serializers.ModelSerializer):
 
 #For Entity in front end
 class EQuestions2Serializer(serializers.ModelSerializer):
-    entityType = serializers.CharField(source='Selected_Option')
+    entityType = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions2, 'Selected_Option'),
+        source='Selected_Option',
+    )
     entityName = serializers.CharField(source='Business_Name')
-    entityStateofRegistration = serializers.CharField(source='Registration_Region')
+    entityStateofRegistration = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions2, 'Registration_Region'),
+        source='Registration_Region',
+    )
+
     class Meta:
         model = EQuestions2
         fields = [
@@ -91,7 +122,11 @@ class EQuestions2Serializer(serializers.ModelSerializer):
 
 #For Pre-Capital in front end
 class EQuestions3Serializer(serializers.ModelSerializer):
-    preCapitalRaise = serializers.CharField(source='Selected_Option')
+    preCapitalRaise = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions3, 'Selected_Option'),
+        source='Selected_Option',
+    )
+
     class Meta:
         model = EQuestions3
         fields = [
@@ -108,22 +143,29 @@ class EQuestions4Serializer(serializers.ModelSerializer):
             'capitalPreMarkets'
         ]
 
-# For Planned Raise in front end 
+# For Planned Raise in front end
 class EQuestions5Serializer(serializers.ModelSerializer):
-    plannedRaise = serializers.CharField(max_length=200,source='Selected_Option')
-                
+    plannedRaise = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions5, 'Selected_Option'),
+        source='Selected_Option',
+    )
+
     class Meta:
-        model = EQuestions5 
+        model = EQuestions5
         fields = [
             'plannedRaise'
         ]
 
-#For Rounds in front end 
+#For Rounds in front end
 class EQuestions6Serializer(serializers.ModelSerializer):
     currentRounds = serializers.ListField(child=serializers.CharField(max_length=200),source='Selected_Options')
-    howManyRounds = serializers.CharField(max_length=200,source='Selected_Option')
+    howManyRounds = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions6, 'Selected_Option'),
+        source='Selected_Option',
+    )
+
     class Meta:
-        model = EQuestions6    
+        model = EQuestions6
         fields = [
             'currentRounds',
             'howManyRounds'
@@ -140,8 +182,21 @@ class EQuestions7Serializer(serializers.ModelSerializer):
         
 # For Risk Assesment in front end
 class EQuestions8Serializer(serializers.ModelSerializer):
-    riskToleranceInvestor = serializers.CharField(max_length=200,source='Selected_Option')
-    riskToleranceFounder = serializers.CharField(max_length=200,source='Selected_Option2')
+    # Use ChoiceField with the model's own choices so the API rejects
+    # values that don't belong in the corresponding column. Plain
+    # CharField was silently accepting anything (including risk-tolerance
+    # strings landing in the cost-of-capital column), which then breaks
+    # radio preselection on reload because the stored value isn't in
+    # the frontend option list.
+    riskToleranceInvestor = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions8, 'Selected_Option'),
+        source='Selected_Option',
+    )
+    riskToleranceFounder = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions8, 'Selected_Option2'),
+        source='Selected_Option2',
+    )
+
     class Meta:
         model = EQuestions8
         fields = [
@@ -291,7 +346,11 @@ class EQuestions13Serializer(serializers.ModelSerializer):
         ]
 
 class EQuestions14Serializer(serializers.ModelSerializer):
-    naicsCode = serializers.CharField(max_length=200,source='Industry_Type')
+    naicsCode = serializers.ChoiceField(
+        choices=_model_field_choices(EQuestions14, 'Industry_Type'),
+        source='Industry_Type',
+    )
+
     class Meta:
         model = EQuestions14
         fields = [
@@ -462,9 +521,13 @@ class payLoadSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class referalResponseSerializer(serializers.ModelSerializer):
-    referralSource = serializers.CharField(max_length=200,source='referral_source')
+    referralSource = serializers.ChoiceField(
+        choices=_model_field_choices(ReferalResponse, 'referral_source'),
+        source='referral_source',
+    )
     referrerName = serializers.CharField(max_length=200,source='referrer_name')
-    referralOther = serializers.CharField(max_length=200,source='referral_other')    
+    referralOther = serializers.CharField(max_length=200,source='referral_other')
+
     class Meta:
         model = ReferalResponse
         fields = ['referralSource','referrerName','referralOther']
@@ -476,9 +539,18 @@ class preRatingSerializer(serializers.ModelSerializer):
 
 # For Lending Information in front end
 class LendingRequirementsSerializer(serializers.ModelSerializer):
-    collateralStatus = serializers.CharField(max_length=255, source='collateral_status', required=False, allow_blank=True)
-    creditScore = serializers.CharField(max_length=255, source='credit_score', required=False, allow_blank=True)
-    criminalHistory = serializers.CharField(max_length=255, source='criminal_history')
+    collateralStatus = serializers.ChoiceField(
+        choices=_model_field_choices(LendingRequirements, 'collateral_status'),
+        source='collateral_status', required=False, allow_blank=True,
+    )
+    creditScore = serializers.ChoiceField(
+        choices=_model_field_choices(LendingRequirements, 'credit_score'),
+        source='credit_score', required=False, allow_blank=True,
+    )
+    criminalHistory = serializers.ChoiceField(
+        choices=_model_field_choices(LendingRequirements, 'criminal_history'),
+        source='criminal_history',
+    )
 
     class Meta:
         model = LendingRequirements
