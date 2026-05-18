@@ -8,6 +8,8 @@ import RegisterPage from './components/auth/RegisterPage';
 import ForgotPasswordPage from './components/auth/ForgotPasswordPage';
 import ResetPasswordConfirmPage from './components/auth/ResetPasswordConfirmPage';
 import ActivateAccountPage from './components/auth/ActivateAccountPage';
+import PricingPage from './components/marketing/PricingPage';
+import CheckoutSuccessPage from './components/marketing/CheckoutSuccessPage';
 import './styles/tailwind.css';
 
 import AppShell from './components/layout/AppShell';
@@ -80,6 +82,11 @@ function App() {
             path="/userActivate/:uid/:token"
             element={<ActivateAccountPage />}
           />
+
+          {/* Public marketing + Stripe-driven onboarding routes.
+              Reachable without authentication so prospects can buy. */}
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
 
           {/* All authenticated routes go through ProtectedRoute */}
           <Route

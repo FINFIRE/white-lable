@@ -226,6 +226,14 @@ STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 STRIPE_TRIAL_DAYS = env.int('STRIPE_TRIAL_DAYS', default=7)
 
+# Absolute URL the Stripe Checkout redirect should land on (the React
+# app, NOT the Django backend port). In dev the React dev server runs
+# at http://localhost:5173; in prod the user-facing host like
+# https://appfinfire.com. Leaving this blank falls back to the request
+# host, which is fine in dev because Vite proxies through with the
+# original Host header.
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:5173')
+
 
 
 # Internationalization

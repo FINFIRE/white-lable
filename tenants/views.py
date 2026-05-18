@@ -23,8 +23,16 @@ User = get_user_model()
 
 
 class ListCreateClientAPIView(generics.ListCreateAPIView):
+    """List + create tenants. Restricted to platform admins.
+
+    The previous behaviour allowed any caller to POST a new tenant (the
+    quickest path to bootstrap a multi-tenant install). Now that the
+    public funnel goes through Stripe Checkout + the token-gated
+    `subscriptions.TenantOnboardingView`, the bare endpoint is locked
+    down so a stranger can't mint themselves a tenant without paying.
+    """
     http_method_names = ['get', 'post']
-    permission_classes = [AllowAny,]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
     pagination_class = LimitOffsetPagination
@@ -32,13 +40,6 @@ class ListCreateClientAPIView(generics.ListCreateAPIView):
     filterset_fields = ['schema_name']
     search_fields = ['schema_name', 'domains__domain',]
     ordering_fields = ['created_on',]
-
-    # def get_permissions(self):
-    #     if self.request.method.lower() == 'post':
-    #         self.permission_classes = [AllowAny,]
-    #     elif self.request.method.lower() == 'get':
-    #         self.permission_classes = [IsAuthenticated, IsAdminUser,]
-    #     return super().get_permissions() 
 
 
 class RUDClientAPIView(generics.RetrieveUpdateDestroyAPIView):
