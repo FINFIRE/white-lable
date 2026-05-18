@@ -1,10 +1,61 @@
 import jsPDF from 'jspdf';
 
+/** Branding the thank-you PDF should pick up from the active tenant. */
+export interface ThankYouPdfBranding {
+  /** Display name for the tenant (falls back to "FINFIRE"). */
+  brandName?: string;
+  /** Hex like "#1d4ed8". Lighter/darker shades derived via mix(). */
+  primaryColor?: string;
+}
+
+const LEGACY_BRAND_NAME = 'FINFIRE';
+const LEGACY_PRIMARY: RGB = [29, 78, 216]; // tailwind blue-700
+
+type RGB = [number, number, number];
+
+function hexToRgb(hex?: string): RGB | null {
+  if (!hex) return null;
+  const m = hex.trim().replace('#', '').match(/^([0-9a-f]{6})$/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+/** Mix `rgb` with white by `t` (0 = unchanged, 1 = pure white). */
+function lighten(rgb: RGB, t: number): RGB {
+  return [
+    Math.round(rgb[0] + (255 - rgb[0]) * t),
+    Math.round(rgb[1] + (255 - rgb[1]) * t),
+    Math.round(rgb[2] + (255 - rgb[2]) * t),
+  ];
+}
+
+/** Mix `rgb` with black by `t` (0 = unchanged, 1 = pure black). */
+function darken(rgb: RGB, t: number): RGB {
+  return [
+    Math.round(rgb[0] * (1 - t)),
+    Math.round(rgb[1] * (1 - t)),
+    Math.round(rgb[2] * (1 - t)),
+  ];
+}
+
 /**
- * Generate a thank-you PDF for the user after they complete the questionnaire.
- * Returns a Blob that can be displayed in an iframe or downloaded.
+ * Generate a thank-you PDF for the user after they complete the
+ * questionnaire. Tenant `brandName` + `primaryColor` are used everywhere
+ * the legacy "FINFIRE" string and blue header lived. Returns a Blob
+ * that can be displayed in an iframe or downloaded.
  */
-export function generateThankYouPDF(userName?: string): Blob {
+export function generateThankYouPDF(
+  userName?: string,
+  branding?: ThankYouPdfBranding,
+): Blob {
+  const brandName = (branding?.brandName || LEGACY_BRAND_NAME).trim();
+  const primary = hexToRgb(branding?.primaryColor) ?? LEGACY_PRIMARY;
+  // Derived shades for the highlight box and accents.
+  const primaryFill = lighten(primary, 0.92); // very light (≈primary-50)
+  const primaryBorder = lighten(primary, 0.75); // soft (≈primary-200)
+  const primaryDarker = darken(primary, 0.2); // step-text (≈primary-700)
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -16,14 +67,14 @@ export function generateThankYouPDF(userName?: string): Blob {
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
 
-  // ── Top header band (FINFIRE branding) ─────────────────────────────────
-  doc.setFillColor(29, 78, 216); // primary blue
+  // ── Top header band (tenant brand color) ───────────────────────────────
+  doc.setFillColor(primary[0], primary[1], primary[2]);
   doc.rect(0, 0, pageWidth, 30, 'F');
 
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.text('FINFIRE', margin, 19);
+  doc.text(brandName.toUpperCase(), margin, 19);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -54,8 +105,7 @@ export function generateThankYouPDF(userName?: string): Blob {
   doc.setTextColor(51, 65, 85); // slate-700
   doc.setFontSize(11);
 
-  const body1 =
-    'Thank you for taking the time to complete the FINFIRE capital matching questionnaire. We truly appreciate the detailed information you have shared with us about your business, financial profile, and capital requirements.';
+  const body1 = `Thank you for taking the time to complete the ${brandName} capital matching questionnaire. We truly appreciate the detailed information you have shared with us about your business, financial profile, and capital requirements.`;
 
   const body2 =
     'Our team is now reviewing your responses to identify the most suitable capital sources and intermediaries for your specific situation. This careful review ensures that we recommend the right capital type, the right partners, and the right strategy tailored to your goals.';
@@ -80,21 +130,21 @@ export function generateThankYouPDF(userName?: string): Blob {
   addParagraph(body3);
   addParagraph(body4);
 
-  // ── Highlighted "What happens next" box ────────────────────────────────
+  // ── Highlighted "What happens next" box (tenant primary tones) ─────────
   y += 4;
-  doc.setFillColor(239, 246, 255); // primary-50
-  doc.setDrawColor(191, 219, 254); // primary-200
+  doc.setFillColor(primaryFill[0], primaryFill[1], primaryFill[2]);
+  doc.setDrawColor(primaryBorder[0], primaryBorder[1], primaryBorder[2]);
   const boxHeight = 38;
   doc.roundedRect(margin, y, contentWidth, boxHeight, 3, 3, 'FD');
 
-  doc.setTextColor(29, 78, 216);
+  doc.setTextColor(primary[0], primary[1], primary[2]);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.text('What happens next?', margin + 6, y + 9);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(30, 64, 175);
+  doc.setTextColor(primaryDarker[0], primaryDarker[1], primaryDarker[2]);
   const steps = [
     '1. Our team reviews your questionnaire responses (within 1-2 business days).',
     '2. We identify and validate the best-fit capital types and intermediaries.',
@@ -117,7 +167,7 @@ export function generateThankYouPDF(userName?: string): Blob {
   y += 7;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('The FINFIRE Team', margin, y);
+  doc.text(`The ${brandName} Team`, margin, y);
 
   // ── Footer ─────────────────────────────────────────────────────────────
   doc.setDrawColor(226, 232, 240);
@@ -127,16 +177,16 @@ export function generateThankYouPDF(userName?: string): Blob {
   doc.setFontSize(8);
   doc.setTextColor(148, 163, 184);
   doc.text(
-    'FINFIRE Capital Matching Platform • Confidential',
+    `${brandName} Capital Matching Platform • Confidential`,
     pageWidth / 2,
     pageHeight - 12,
-    { align: 'center' }
+    { align: 'center' },
   );
   doc.text(
     'This document was generated automatically upon completion of your survey.',
     pageWidth / 2,
     pageHeight - 7,
-    { align: 'center' }
+    { align: 'center' },
   );
 
   return doc.output('blob');

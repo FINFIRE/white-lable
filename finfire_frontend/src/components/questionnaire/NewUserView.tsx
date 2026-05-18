@@ -3,6 +3,7 @@ import { useQuestionnaireStore } from '../../stores/questionnaireStore';
 import { getStepConfig } from '../../constants/stepConfig';
 import { postPayload } from '../../api/connections';
 import { useAuthStore } from '../../stores/authStore';
+import { useBrandingStore } from '../../stores/brandingStore';
 import { generateThankYouPDF } from '../../utils/thankYouPdf';
 
 import Step1Contact from './steps/Step1Contact';
@@ -88,6 +89,7 @@ const NewUserView: React.FC = () => {
   const setMatchedCapital = useQuestionnaireStore((s) => s.setMatchedCapital);
   const setMatchPdfUrl = useQuestionnaireStore((s) => s.setMatchPdfUrl);
   const user = useAuthStore((s) => s.user);
+  const branding = useBrandingStore((s) => s.branding);
 
   const [matching, setMatching] = useState(false);
   const [matchError, setMatchError] = useState<string | null>(null);
@@ -103,7 +105,10 @@ const NewUserView: React.FC = () => {
     try {
       // Generate a thank-you PDF locally instead of calling the backend match API.
       // The user will be contacted by staff after their submission is reviewed.
-      const pdfBlob = generateThankYouPDF(user?.username);
+      const pdfBlob = generateThankYouPDF(user?.username, {
+        brandName: branding?.display_name || branding?.name,
+        primaryColor: branding?.primary_color,
+      });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       setMatchPdfUrl(pdfUrl);
       setMatchedCapital('Submitted');
