@@ -28,6 +28,26 @@ class Client(TenantMixin):
         help_text='Multi-line postal address used in the letter footer.',
     )
 
+    # ── Subscription state ────────────────────────────────────────────
+    # Denormalised from the Stripe Subscription so we can gate access
+    # with one query. The canonical source of truth is Stripe (and the
+    # `stripe_subscription_id` lookup); these columns are written by
+    # the webhook handler.
+    stripe_customer_id = models.CharField(max_length=120, blank=True, default='')
+    stripe_subscription_id = models.CharField(max_length=120, blank=True, default='')
+    subscription_status = models.CharField(
+        max_length=32, blank=True, default='',
+        help_text='Latest Stripe status: trialing / active / past_due / '
+                  'canceled / incomplete / incomplete_expired / unpaid.',
+    )
+    subscription_plan_slug = models.CharField(
+        max_length=64, blank=True, default='',
+        help_text='Slug of the subscriptions.Plan currently in effect '
+                  '(e.g. "monthly", "yearly").',
+    )
+    current_period_end = models.DateTimeField(blank=True, null=True)
+    trial_end = models.DateTimeField(blank=True, null=True)
+
     # default true, schema will be automatically created and synced when it is saved
     auto_create_schema = True
 

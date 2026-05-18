@@ -17,10 +17,13 @@ class BackendHealthCheckApiView(generics.GenericAPIView):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     path('tenants/', include('tenants.urls')),
     path('api/health-check/', BackendHealthCheckApiView.as_view(), name='backend-health-check'),
 
+    # Stripe Checkout + tenant onboarding live on the public schema
+    # because tenants don't exist yet at this point in the funnel.
+    path('api/', include('subscriptions.urls')),
 ]
 
 

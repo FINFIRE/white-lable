@@ -52,6 +52,7 @@ SHARED_APPS = (
 
 
     'Algorithm.apps.AlgorithmConfig',
+    'subscriptions.apps.SubscriptionsConfig',
 
 )
 
@@ -214,6 +215,24 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+
+# Stripe — keys come from .env so they never end up in source control.
+# Live keys differ from test keys (`pk_live_…` / `sk_live_…`); the
+# webhook secret comes from `stripe listen` in dev or the dashboard
+# in prod. STRIPE_TRIAL_DAYS controls the trial length on the
+# "free trial" plan tier.
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
+STRIPE_TRIAL_DAYS = env.int('STRIPE_TRIAL_DAYS', default=7)
+
+# Absolute URL the Stripe Checkout redirect should land on (the React
+# app, NOT the Django backend port). In dev the React dev server runs
+# at http://localhost:5173; in prod the user-facing host like
+# https://appfinfire.com. Leaving this blank falls back to the request
+# host, which is fine in dev because Vite proxies through with the
+# original Host header.
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:5173')
 
 
 
