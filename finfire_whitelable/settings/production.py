@@ -2,8 +2,13 @@ from .base import *
 
 DEBUG = False
 
-# all hosts allowed to run the backend service
-ALLOWED_HOSTS = []
+# Apex + any tenant subdomain of appfinfire.com. The leading dot on
+# ".appfinfire.com" matches every subdomain (django-tenants needs this
+# because the Host header for a tenant request is e.g. acme.appfinfire.com).
+ALLOWED_HOSTS = [
+    'appfinfire.com',
+    '.appfinfire.com',
+]
 
 # trusted origins for form submission. Wildcard host syntax requires
 # Django >= 4.0 and matches any subdomain (e.g. acme.appfinfire.com).
@@ -45,6 +50,17 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 
 ALLOWED_FRONTEND_ORIGINS = [
-    
+    'https://appfinfire.com',
 ]
+
+# In production the SPA bundle is served from /var/www/finfire by nginx, and
+# Django only needs to write collectstatic output + user uploads. Pin both to
+# absolute paths so nginx (running on the host, not in the container) can
+# read them through the bind mount declared in docker-compose.prod.yml.
+STATIC_ROOT = '/app/static'
+MEDIA_ROOT = '/app/media'
+
+# Default frontend URL used in activation/reset emails. Per-tenant URLs are
+# still built from the tenant's domain at request time.
+FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='https://appfinfire.com')
 

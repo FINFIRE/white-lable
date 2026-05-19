@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: .
+    image: finfire-api:prod
+    container_name: finfire-api
+    restart: always
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - /var/www/finfire/static:/app/static
+      - /var/www/finfire/media:/app/media
+      - /var/log/finfire/django:/var/log/django
+      - /var/log/finfire/gunicorn:/var/log/gunicorn
+    command:
+      - gunicorn
+      - finfire_whitelable.wsgi:application
+      - --bind=0.0.0.0:8000
+      - --workers=3
+      - --timeout=60
+      - --access-logfile=/var/log/gunicorn/access.log
+      - --error-logfile=/var/log/gunicorn/error.log

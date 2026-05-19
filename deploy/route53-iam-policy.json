@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Least-privilege policy for certbot-dns-route53 wildcard cert issuance + renewal. Replace HOSTED_ZONE_ID with the Route 53 hosted zone ID for appfinfire.com.",
+  "Statement": [
+    {
+      "Sid": "ListZonesAndChanges",
+      "Effect": "Allow",
+      "Action": [
+        "route53:ListHostedZones",
+        "route53:GetChange"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EditAppfinfireZoneRecords",
+      "Effect": "Allow",
+      "Action": "route53:ChangeResourceRecordSets",
+      "Resource": "arn:aws:route53:::hostedzone/HOSTED_ZONE_ID"
+    }
+  ]
+}
