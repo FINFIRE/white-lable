@@ -234,6 +234,24 @@ STRIPE_TRIAL_DAYS = env.int('STRIPE_TRIAL_DAYS', default=7)
 # original Host header.
 FRONTEND_BASE_URL = env('FRONTEND_BASE_URL', default='http://localhost:5173')
 
+# Comma-separated list (in .env) of platform-team email addresses that
+# receive operational notifications — e.g. "a new tenant paid and
+# onboarded". This is distinct from `Client.support_email` (which is
+# the *tenant's* team) and survives the per-tenant routing change.
+PLATFORM_NOTIFICATION_EMAILS = env.list(
+    'PLATFORM_NOTIFICATION_EMAILS',
+    default=[
+        'tony@tonydrexelsmith.com',
+        'sam@finfire.com',
+        'romin@finfire.com',
+        'leslye@tonydrexelsmith.com',
+        'leslye@finfire.com',
+        'nick@finfire.com',
+        'ronald@finfire.com',
+        'brandon@finfire.com',
+    ],
+)
+
 
 
 # Internationalization

@@ -64,16 +64,68 @@ export async function getCheckoutSessionStatus(
   return data;
 }
 
-export async function onboardTenant(input: {
+export interface OnboardTenantInput {
+  // Required
   onboarding_token: string;
   schema_name: string;
   company_name: string;
   admin_email: string;
   admin_password: string;
-}): Promise<OnboardingResponse> {
+  // Optional branding (mirrors tenants.Client columns). Anything left
+  // blank/null is just not sent and the column keeps its default.
+  display_name?: string;
+  primary_color?: string; // hex like #1f6feb
+  accent_color?: string;
+  contact_phone?: string;
+  signatory_name?: string;
+  signatory_title?: string;
+  address?: string;
+  logo?: File | null;
+  favicon?: File | null;
+  signature_image?: File | null;
+}
+
+export async function onboardTenant(
+  input: OnboardTenantInput,
+): Promise<OnboardingResponse> {
+  // Build a multipart FormData so image fields ride along with the
+  // text fields in a single request. Axios sets the correct
+  // Content-Type (incl. boundary) automatically when given a FormData.
+  const form = new FormData();
+  const append = (key: keyof OnboardTenantInput) => {
+    const v = input[key];
+    if (v === undefined || v === null) return;
+    if (typeof v === 'string') {
+      if (v.trim() === '') return; // treat blank as "skipped"
+      form.append(key, v);
+    } else if (v instanceof File) {
+      form.append(key, v);
+    }
+  };
+
+  (
+    [
+      'onboarding_token',
+      'schema_name',
+      'company_name',
+      'admin_email',
+      'admin_password',
+      'display_name',
+      'primary_color',
+      'accent_color',
+      'contact_phone',
+      'signatory_name',
+      'signatory_title',
+      'address',
+      'logo',
+      'favicon',
+      'signature_image',
+    ] as (keyof OnboardTenantInput)[]
+  ).forEach(append);
+
   const { data } = await api.post<OnboardingResponse>(
     'tenants/onboard/',
-    input,
+    form,
   );
   return data;
 }
