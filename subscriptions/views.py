@@ -29,6 +29,7 @@ from tenants.models import Client, Domain
 from tenants.serializers import ClientSerializer
 
 from .models import PendingOnboarding, Plan
+from .notifications import notify_platform_team_of_new_tenant
 from .serializers import (
     CreateCheckoutSessionSerializer,
     PlanPublicSerializer,
@@ -46,6 +47,26 @@ def _frontend_base_url(request):
     if explicit:
         return explicit.rstrip('/')
     return request.build_absolute_uri('/').rstrip('/')
+
+
+def _sget(obj, key, default=None):
+    """Safe accessor for a Stripe SDK object or dict.
+
+    Stripe v15 removed `.get()` from `StripeObject` (it no longer
+    inherits from dict), so calling `obj.get('status')` on the result
+    of `Session.retrieve()` or on the event payload from
+    `Webhook.construct_event()` raises AttributeError. This helper
+    works for both `StripeObject` (attribute access) and plain
+    `dict` (subscript), and returns `default` when the key is absent
+    instead of raising.
+    """
+    if obj is None:
+        return default
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    # Stripe v15 StripeObject: attribute access. `getattr` returns
+    # default on missing without raising.
+    return getattr(obj, key, default)
 
 
 # ── Pricing endpoint ───────────────────────────────────────────────────
@@ -193,8 +214,8 @@ class StripeWebhookView(views.APIView):
     def _handle_checkout_session_completed(self, session):
         """Payment cleared. Create the PendingOnboarding row that the
         success page polls for."""
-        meta = session.get('metadata') or {}
-        plan_slug = meta.get('plan_slug')
+        meta = _sget(session, 'metadata') or {}
+        plan_slug = _sget(meta, 'plan_slug')
         try:
             plan = Plan.objects.get(slug=plan_slug)
         except Plan.DoesNotExist:
@@ -202,17 +223,22 @@ class StripeWebhookView(views.APIView):
             # but we don't want a 500 here).
             return
 
+        customer_details = _sget(session, 'customer_details')
         defaults = {
             'plan': plan,
-            'with_trial': meta.get('with_trial') == 'true',
-            'email': session.get('customer_email') or session.get('customer_details', {}).get('email', ''),
-            'company_name': meta.get('company_name', ''),
-            'stripe_customer_id': session.get('customer') or '',
-            'stripe_subscription_id': session.get('subscription') or '',
+            'with_trial': _sget(meta, 'with_trial') == 'true',
+            'email': (
+                _sget(session, 'customer_email')
+                or _sget(customer_details, 'email', '')
+                or ''
+            ),
+            'company_name': _sget(meta, 'company_name', ''),
+            'stripe_customer_id': _sget(session, 'customer') or '',
+            'stripe_subscription_id': _sget(session, 'subscription') or '',
             'paid_at': datetime.now(timezone.utc),
         }
         PendingOnboarding.objects.update_or_create(
-            stripe_session_id=session['id'],
+            stripe_session_id=_sget(session, 'id'),
             defaults=defaults,
         )
 
@@ -225,16 +251,16 @@ class StripeWebhookView(views.APIView):
     def _sync_subscription_to_client(self, sub):
         """Mirror the subscription state onto the matching Client row.
         The link is the stripe_subscription_id stored at onboarding time."""
-        sub_id = sub.get('id')
+        sub_id = _sget(sub, 'id')
         if not sub_id:
             return
         client = Client.objects.filter(stripe_subscription_id=sub_id).first()
         if client is None:
             return
 
-        period_end_ts = sub.get('current_period_end')
-        trial_end_ts = sub.get('trial_end')
-        client.subscription_status = sub.get('status') or ''
+        period_end_ts = _sget(sub, 'current_period_end')
+        trial_end_ts = _sget(sub, 'trial_end')
+        client.subscription_status = _sget(sub, 'status') or ''
         client.current_period_end = (
             datetime.fromtimestamp(period_end_ts, tz=timezone.utc)
             if period_end_ts else None
@@ -254,19 +280,29 @@ class StripeWebhookView(views.APIView):
 class CheckoutSessionStatusView(views.APIView):
     """GET /api/checkout/session/{stripe_session_id}/
 
-    The success page polls this until the webhook has run and a
-    PendingOnboarding row exists for the session. Once it does, we
-    return the onboarding_token the visitor will paste into the form.
+    The success page polls this until a PendingOnboarding row exists
+    for the session. Normally that row is created by the
+    `checkout.session.completed` webhook handler, but in dev (and on
+    first deploy before the webhook endpoint is configured in the
+    Stripe dashboard) the webhook may not be reaching us yet. We
+    therefore fall back to asking Stripe directly via the API: if
+    Stripe says the session is `complete`, we materialise the row
+    inline so the visitor can keep moving. The webhook still does the
+    same work redundantly when it eventually arrives (we use
+    `update_or_create`), and remains the only path for ongoing
+    subscription-lifecycle events (cancel, payment failure, renewal).
     """
     permission_classes = [AllowAny]
 
     def get(self, request, session_id, *args, **kwargs):
         po = PendingOnboarding.objects.filter(stripe_session_id=session_id).first()
         if po is None:
-            return response.Response(
-                {'paid': False, 'reason': 'pending_webhook'},
-                status=status.HTTP_200_OK,
-            )
+            po = self._materialize_from_stripe(session_id)
+            if po is None:
+                return response.Response(
+                    {'paid': False, 'reason': 'pending_payment'},
+                    status=status.HTTP_200_OK,
+                )
 
         if po.status == PendingOnboarding.STATUS_ONBOARDED:
             return response.Response(
@@ -286,6 +322,54 @@ class CheckoutSessionStatusView(views.APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+    @staticmethod
+    def _materialize_from_stripe(session_id):
+        """Retrieve the Checkout Session from Stripe and, if it's
+        complete, create the matching PendingOnboarding row so the
+        visitor doesn't have to wait for the webhook. Returns None
+        when the session isn't ready (or Stripe rejects the lookup)."""
+        if not settings.STRIPE_SECRET_KEY:
+            return None
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+        except stripe.error.StripeError:
+            return None
+
+        # `status='complete'` is what Stripe sets once the customer has
+        # finished Checkout, regardless of payment_status (trials show
+        # payment_status='no_payment_required' during their free period).
+        if _sget(session, 'status') != 'complete':
+            return None
+
+        meta = _sget(session, 'metadata') or {}
+        plan_slug = _sget(meta, 'plan_slug')
+        if not plan_slug:
+            return None
+        try:
+            plan = Plan.objects.get(slug=plan_slug)
+        except Plan.DoesNotExist:
+            return None
+
+        customer_details = _sget(session, 'customer_details')
+        po, _ = PendingOnboarding.objects.update_or_create(
+            stripe_session_id=session_id,
+            defaults={
+                'plan': plan,
+                'with_trial': _sget(meta, 'with_trial') == 'true',
+                'email': (
+                    _sget(session, 'customer_email')
+                    or _sget(customer_details, 'email', '')
+                    or ''
+                ),
+                'company_name': _sget(meta, 'company_name', ''),
+                'stripe_customer_id': _sget(session, 'customer') or '',
+                'stripe_subscription_id': _sget(session, 'subscription') or '',
+                'paid_at': datetime.now(timezone.utc),
+            },
+        )
+        return po
 
 
 # ── Tenant onboarding (token-gated) ────────────────────────────────────
@@ -347,17 +431,37 @@ class TenantOnboardingView(generics.GenericAPIView):
         client_serializer.is_valid(raise_exception=True)
         client = client_serializer.save()
 
-        # Attach the Stripe identifiers to the freshly created Client and
-        # mark the PendingOnboarding consumed.
+        # Attach the Stripe identifiers + any optional branding the
+        # visitor filled out in the "Additional information" section.
+        # Anything they skipped stays at its model default (blank/null).
         client.stripe_customer_id = po.stripe_customer_id
         client.stripe_subscription_id = po.stripe_subscription_id
         client.subscription_plan_slug = po.plan.slug
         client.subscription_status = 'trialing' if po.with_trial else 'active'
         client.support_email = po.email  # sensible default; admin can change
-        client.save(update_fields=[
+
+        update_fields = [
             'stripe_customer_id', 'stripe_subscription_id',
             'subscription_plan_slug', 'subscription_status', 'support_email',
-        ])
+        ]
+
+        BRANDING_FIELDS = (
+            'display_name', 'logo', 'favicon',
+            'primary_color', 'accent_color',
+            'contact_phone', 'signature_image',
+            'signatory_name', 'signatory_title', 'address',
+        )
+        for field in BRANDING_FIELDS:
+            value = data.get(field)
+            # Treat blank strings as "skipped" so we don't overwrite a
+            # default with empty text; file fields come through as None
+            # when omitted, which we also skip.
+            if value in (None, ''):
+                continue
+            setattr(client, field, value)
+            update_fields.append(field)
+
+        client.save(update_fields=update_fields)
 
         po.status = PendingOnboarding.STATUS_ONBOARDED
         po.completed_at = datetime.now(timezone.utc)
@@ -366,6 +470,16 @@ class TenantOnboardingView(generics.GenericAPIView):
 
         # Surface the subdomain so the success page can show a login link.
         domain = Domain.objects.filter(tenant=client).first()
+
+        # Tell the platform team a new tenant just paid + onboarded.
+        # Best-effort: the helper swallows errors so a flaky SMTP doesn't
+        # take the visitor's onboarding down with it.
+        notify_platform_team_of_new_tenant(
+            client=client,
+            pending_onboarding=po,
+            domain=domain.domain if domain else None,
+        )
+
         return response.Response(
             {
                 'schema_name': client.schema_name,
