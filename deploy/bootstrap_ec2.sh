@@ -70,6 +70,22 @@ sudo mkdir -p \
     /srv/finfire
 sudo chown -R "$USER:$USER" /var/www/finfire /var/log/finfire /srv/finfire
 
+# Postgres data directory. The official postgres image runs initdb as
+# UID 999 / GID 999 inside the container; the bind mount on the host must
+# be owned by that UID or initdb refuses to write ("data directory has
+# wrong ownership"). We don't add a 'postgres' user on the host — just
+# chown to the numeric IDs directly, which is what the container cares
+# about.
+sudo mkdir -p /var/lib/finfire-postgres
+sudo chown -R 999:999 /var/lib/finfire-postgres
+sudo chmod 700 /var/lib/finfire-postgres
+
+# Backup target — pg_dump output ends up here if you wire up the cron in
+# deploy/backup_db.sh (out of scope for this script, but the dir is
+# pre-created so the cron job doesn't have to be root just to mkdir).
+sudo mkdir -p /var/backups/finfire
+sudo chown -R "$USER:$USER" /var/backups/finfire
+
 # --- 7. Firewall -----------------------------------------------------------
 sudo ufw allow OpenSSH
 sudo ufw allow 'Nginx Full'
