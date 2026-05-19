@@ -1,4 +1,27 @@
 services:
+  db:
+    image: postgres:16
+    container_name: finfire-db
+    restart: always
+    env_file: .env
+    # Bind to loopback so the DB is only reachable from inside the box
+    # (containers on the same compose network reach it via service name `db`,
+    # which doesn't depend on this port mapping). Useful for ad-hoc psql from
+    # the host without ever exposing 5432 publicly.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Persistent data outside the repo, so `git pull`, `docker compose
+      # down -v`, or accidentally `rm -rf /srv/finfire` cannot touch it.
+      - /var/lib/finfire-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - finfire-net
+
   backend:
     build: .
     image: finfire-api:prod
@@ -7,6 +30,9 @@ services:
     env_file: .env
     environment:
       - PYTHONUNBUFFERED=1
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -22,3 +48,8 @@ services:
       - --timeout=60
       - --access-logfile=/var/log/gunicorn/access.log
       - --error-logfile=/var/log/gunicorn/error.log
+    networks:
+      - finfire-net
+
+networks:
+  finfire-net:
