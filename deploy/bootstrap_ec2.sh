@@ -13,10 +13,20 @@ if [[ $EUID -eq 0 ]]; then
     exit 1
 fi
 
+# Silence apt + needrestart prompts for the whole run. Ubuntu 22.04+ ships
+# `needrestart` which interrupts `apt upgrade` to ask which services to
+# restart and tries to use polkit to do it — that fails on a headless EC2
+# under the password-less `ubuntu` user. `NEEDRESTART_MODE=a` answers
+# "automatic" non-interactively. `DEBIAN_FRONTEND=noninteractive` covers
+# dpkg's own prompts (the two are separate systems).
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export NEEDRESTART_SUSPEND=1
+
 # --- 1. Base packages ------------------------------------------------------
-sudo apt-get update -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+sudo -E apt-get update -y
+sudo -E apt-get upgrade -y
+sudo -E apt-get install -y \
     ca-certificates curl git ufw nginx \
     python3-pip software-properties-common gnupg lsb-release \
     rsync unzip
@@ -33,7 +43,7 @@ fi
 # --- 3. Node.js 20 (for `npm run build` on the box) -----------------------
 if ! command -v node >/dev/null 2>&1; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    sudo -E apt-get install -y nodejs
 fi
 
 # --- 4. Docker Engine + compose plugin -------------------------------------
@@ -45,8 +55,8 @@ if ! command -v docker >/dev/null 2>&1; then
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
 https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
         sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-    sudo apt-get update -y
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+    sudo -E apt-get update -y
+    sudo -E apt-get install -y docker-ce docker-ce-cli containerd.io \
         docker-buildx-plugin docker-compose-plugin
     sudo usermod -aG docker "$USER"
 fi

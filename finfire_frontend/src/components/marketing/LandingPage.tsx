@@ -10,6 +10,17 @@ import { Link } from 'react-router-dom';
 const PLATFORM_NAME = 'FINFIRE';
 const SUPPORT_EMAIL = 'hello@finfire.com';
 
+// White-glove concierge contact — a human-assisted setup path for
+// firms that would rather have us stand up their tenant for them
+// instead of going through the self-serve trial flow. Keep these
+// constants in one place; they show up in the ConciergeCallout
+// section and could later move to env if the contact changes often.
+const CONCIERGE_NAME = 'Randa';
+const CONCIERGE_PHONE_DISPLAY = '+1 (702) 487-2365';
+const CONCIERGE_PHONE_TEL = '+17024872365';
+const CONCIERGE_EMAIL = 'randa@finfire.com';
+const CONCIERGE_HOURS = '9:30 AM – 4:30 PM PST';
+
 const FEATURES = [
   {
     title: 'AI-driven matching algorithm',
@@ -87,6 +98,7 @@ const LandingPage: React.FC = () => {
       <Hero />
       <Features />
       <HowItWorks />
+      <ConciergeCallout />
       <CTABanner />
       <FAQSection />
       <Footer />
@@ -230,6 +242,99 @@ const HowItWorks: React.FC = () => (
           </li>
         ))}
       </ol>
+    </div>
+  </section>
+);
+
+// ── Concierge callout ──────────────────────────────────────────────
+// Human-assisted setup path. We surface it after "How it works" so
+// that visitors who don't want to go through the self-serve flow
+// see a clear alternative before they hit the "Start your trial"
+// CTA banner. Phone + email are click-to-action via tel:/mailto:.
+
+const ConciergeCallout: React.FC = () => (
+  <section id="concierge" className="py-20 sm:py-24">
+    <div className="mx-auto max-w-5xl px-6">
+      <div className="rounded-2xl border border-primary-200 bg-gradient-to-br from-primary-50 via-white to-primary-50 p-8 sm:p-12 shadow-sm">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary-600">
+              Prefer a personal touch?
+            </p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight">
+              Own the application in your name — let us set it up for you
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Skip the self-serve flow. One of our representatives will create
+              your personalized {PLATFORM_NAME} application end-to-end — your
+              subdomain, your branding, your signature — so you can hand it to
+              clients on day one.
+            </p>
+            <p className="mt-4 text-slate-600">
+              Call {CONCIERGE_NAME} at{' '}
+              <a
+                href={`tel:${CONCIERGE_PHONE_TEL}`}
+                className="font-semibold text-primary-700 hover:underline"
+              >
+                {CONCIERGE_PHONE_DISPLAY}
+              </a>{' '}
+              from {CONCIERGE_HOURS}, or email your contact number to{' '}
+              <a
+                href={`mailto:${CONCIERGE_EMAIL}`}
+                className="font-semibold text-primary-700 hover:underline"
+              >
+                {CONCIERGE_EMAIL}
+              </a>{' '}
+              and she will get back to you.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-primary-200 bg-white p-6 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Talk to {CONCIERGE_NAME}
+            </p>
+            <dl className="mt-4 space-y-4 text-sm">
+              <div>
+                <dt className="text-slate-500">Phone</dt>
+                <dd className="mt-1">
+                  <a
+                    href={`tel:${CONCIERGE_PHONE_TEL}`}
+                    className="text-lg font-semibold text-slate-900 hover:text-primary-700"
+                  >
+                    {CONCIERGE_PHONE_DISPLAY}
+                  </a>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {CONCIERGE_HOURS}
+                  </div>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Email</dt>
+                <dd className="mt-1">
+                  <a
+                    href={`mailto:${CONCIERGE_EMAIL}`}
+                    className="text-base font-semibold text-slate-900 hover:text-primary-700 break-all"
+                  >
+                    {CONCIERGE_EMAIL}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+            <a
+              href={`tel:${CONCIERGE_PHONE_TEL}`}
+              className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700"
+            >
+              Call {CONCIERGE_NAME} now
+            </a>
+            <a
+              href={`mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent('Personalized ' + PLATFORM_NAME + ' application')}`}
+              className="mt-2 inline-flex w-full items-center justify-center rounded-lg border border-primary-600 px-4 py-3 text-sm font-semibold text-primary-700 hover:bg-primary-50"
+            >
+              Email {CONCIERGE_NAME}
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 );

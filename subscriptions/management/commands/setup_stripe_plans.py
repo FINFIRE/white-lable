@@ -142,11 +142,16 @@ class Command(BaseCommand):
         for price in stripe.Price.list(
             product=product_id, active=True, limit=100,
         ).auto_paging_iter():
-            recurring = getattr(price, 'recurring', None) or {}
+            # On stripe-python >= 15, StripeObject no longer subclasses dict,
+            # so `.get()` raises AttributeError. Use attribute access on the
+            # nested `recurring` object instead — it's still a StripeObject
+            # when present, and None for one-time prices.
+            recurring = getattr(price, 'recurring', None)
+            recurring_interval = getattr(recurring, 'interval', None) if recurring else None
             if (
                 price.unit_amount == plan.amount_cents
                 and price.currency == plan.currency.lower()
-                and recurring.get('interval') == plan.interval
+                and recurring_interval == plan.interval
             ):
                 self.stdout.write(f'  found existing Stripe Price for {plan.slug} -> {price.id}')
                 return price.id

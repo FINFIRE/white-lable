@@ -173,6 +173,12 @@ const ADMIN_STEPS: StepDef[] = [
 // "Match" is a virtual tab index after all real steps
 const MATCH_TAB_INDEX = ADMIN_STEPS.length;
 
+// Referrer-toggle labels. Must stay in sync with Step12Referral on the
+// regular-user side so the same `None` sentinel round-trips correctly.
+const HAS_REFERRER_YES = 'I have a referrer';
+const HAS_REFERRER_NONE = 'None';
+const NONE_SENTINEL = 'None';
+
 const inputClass =
   'block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200';
 
@@ -187,6 +193,11 @@ const AdminUserEdit: React.FC = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [matchLoading, setMatchLoading] = useState(false);
   const [matchError, setMatchError] = useState<string | null>(null);
+  // UI-only flag for the referral step's "None" toggle. Mirrors the
+  // regular-user Step12Referral behaviour: when set to HAS_REFERRER_NONE
+  // the referrerName/referralOther inputs are hidden and the save
+  // payload sends the `None` sentinel for both fields.
+  const [referralHasReferrer, setReferralHasReferrer] = useState<string>(HAS_REFERRER_YES);
 
   const { data, isLoading } = useQuery({
     queryKey: ['adminUserData', adminEditUserId],
@@ -203,6 +214,23 @@ const AdminUserEdit: React.FC = () => {
           initial[step.backendKey] = { ...serverData };
         }
       }
+
+      // If the stored referral fields are the `None` sentinel, drive the
+      // toggle into the "None" state AND blank the inputs in formData so
+      // flipping back to "I have a referrer" doesn't show the literal
+      // string "None" inside the text boxes.
+      const r = initial.referral;
+      const noneStored =
+        !!r &&
+        r.referrerName === NONE_SENTINEL &&
+        r.referralOther === NONE_SENTINEL;
+      if (noneStored) {
+        setReferralHasReferrer(HAS_REFERRER_NONE);
+        initial.referral = { ...r, referrerName: '', referralOther: '' };
+      } else {
+        setReferralHasReferrer(HAS_REFERRER_YES);
+      }
+
       setFormData(initial);
     }
   }, [data]);
@@ -317,10 +345,52 @@ const AdminUserEdit: React.FC = () => {
       return;
     }
 
+    if (currentStep.backendKey === 'referral') {
+      // When the admin picks "None", send the literal sentinel for the
+      // two free-text fields — same payload shape the regular-user
+      // Step12Referral form produces, so the backend doesn't need to
+      // know which UI created the row.
+      const isNone = referralHasReferrer === HAS_REFERRER_NONE;
+      saveMutation.mutate({
+        stepKey: 'referral',
+        payload: {
+          referralSource: getVal('referralSource'),
+          referrerName: isNone ? NONE_SENTINEL : getVal('referrerName'),
+          referralOther: isNone ? NONE_SENTINEL : getVal('referralOther'),
+        },
+      });
+      return;
+    }
+
     for (const f of currentStep.fields) {
       payload[f.name] = getVal(f.name);
     }
     saveMutation.mutate({ stepKey: currentStep.backendKey, payload });
+  };
+
+  /* ── Referral step has a UI-only "None" toggle, so it gets a custom
+   * field layout. Renders: referralSource (normal), then the toggle,
+   * then referrerName + referralOther only when toggle is "Yes". */
+  const renderReferralFields = () => {
+    if (!currentStep) return null;
+    const byName: Record<string, FieldDef> = Object.fromEntries(
+      currentStep.fields.map((f) => [f.name, f]),
+    );
+    const showDetails = referralHasReferrer === HAS_REFERRER_YES;
+    return (
+      <>
+        {byName.referralSource && renderField(byName.referralSource)}
+        <RadioGroup
+          name="__hasReferrer"
+          label="Referrer details"
+          options={[HAS_REFERRER_YES, HAS_REFERRER_NONE]}
+          value={referralHasReferrer}
+          onChange={setReferralHasReferrer}
+        />
+        {showDetails && byName.referrerName && renderField(byName.referrerName)}
+        {showDetails && byName.referralOther && renderField(byName.referralOther)}
+      </>
+    );
   };
 
   /* ── Render a single form field ────────────────────────────────────────── */
@@ -517,7 +587,9 @@ const AdminUserEdit: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {currentStep.fields.map(renderField)}
+                {currentStep.backendKey === 'referral'
+                  ? renderReferralFields()
+                  : currentStep.fields.map(renderField)}
               </div>
 
               <div style={{ marginTop: 24 }}>
