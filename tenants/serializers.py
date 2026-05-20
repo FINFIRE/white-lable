@@ -38,23 +38,17 @@ class ClientSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        environment = env('HOST_ENV')
         schema_name = validated_data.get('schema_name')
 
         email = validated_data.pop('email')
         password = validated_data.pop('password', None)
 
         client = super().create(validated_data)
-        if environment == "prod":
-            site_domain = f"{schema_name}.{env('DOMAIN')}"
-        elif environment == "dev":
-            site_domain = f"{schema_name}.{env('DOMAIN')}"
-        elif environment == "staging":
-            site_domain = f"{schema_name}.{env('DOMAIN')}"
-        else:  # local
-            site_domain = f"{schema_name}.localhost"
 
-        Domain.objects.create(tenant=client, domain=site_domain)
+        Domain.objects.create(
+            tenant=client,
+            domain=_resolve_tenant_domain(schema_name),
+        )
 
         # creating user in that domain so that user can login as super user
         with schema_context(client.schema_name):
@@ -64,6 +58,42 @@ class ClientSerializer(serializers.ModelSerializer):
             user.save()
 
         return client
+
+
+def _resolve_tenant_domain(schema_name):
+    """Build the public-facing host for a new tenant from env config.
+
+    `HOST_ENV` controls the format:
+      - 'local'                    -> "<schema>.localhost"
+      - 'prod' / 'staging' / 'dev' -> "<schema>.<DOMAIN>"
+
+    Misconfiguration is treated as a hard error rather than silently
+    producing `<schema>.localhost`, because that mistake only surfaces
+    when a real tenant signs up in production — too late to notice
+    cleanly. Set both vars in the prod `.env` on the host:
+        HOST_ENV=prod
+        DOMAIN=appfinfire.com
+    """
+    environment = (env('HOST_ENV', default='') or '').strip().lower()
+    if environment == 'local':
+        return f'{schema_name}.localhost'
+    if not environment:
+        raise serializers.ValidationError({
+            'detail': (
+                'HOST_ENV is not configured on this deployment. Set '
+                'HOST_ENV=prod (or "staging" / "dev") plus DOMAIN=<root-domain> '
+                'in the server .env before onboarding tenants.'
+            ),
+        })
+    domain = (env('DOMAIN', default='') or '').strip()
+    if not domain:
+        raise serializers.ValidationError({
+            'detail': (
+                f'DOMAIN is not configured (HOST_ENV={environment!r}). '
+                f'Set DOMAIN=<your-root-domain> (e.g. "appfinfire.com") in .env.'
+            ),
+        })
+    return f'{schema_name}.{domain}'
 
 
 class LoginSerializers(TokenObtainPairSerializer):
